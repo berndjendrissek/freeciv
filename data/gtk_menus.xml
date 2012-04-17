@@ -109,6 +109,7 @@
       <menuitem action="CONNECT_ROAD" />
       <menuitem action="CONNECT_RAIL" />
       <menuitem action="CONNECT_IRRIGATION" />
+      <menuitem action="CONNECT_TRANSFORM" />
       <separator />
       <menuitem action="TRANSFORM_TERRAIN" />
       <menuitem action="CLEAN_POLLUTION" />

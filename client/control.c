@@ -1112,6 +1112,9 @@ bool can_unit_do_connect(struct unit *punit, enum unit_activity activity)
 		|| (pterrain == pterrain->irrigation_result
 		    && is_water_adjacent_to_tile(punit->tile)
 		    && !is_activity_on_tile(punit->tile, ACTIVITY_MINE))));
+  case ACTIVITY_TRANSFORM:
+    return (terrain_control.may_transform
+	    && unit_has_type_flag(punit, F_SETTLERS));
   default:
     break;
   }

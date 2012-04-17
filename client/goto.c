@@ -514,6 +514,22 @@ static int get_activity_time(const struct tile *ptile,
     activity_mc += pterrain->rail_time;
     /* No break */
     break;
+  case ACTIVITY_TRANSFORM:
+    if (pterrain->transform_time == 0) {
+      return -1;
+    }
+    if (tile_has_special(ptile, S_MINE)) {
+      /* Don't overwrite mines. */
+      return -1;
+    }
+    if (NULL != ptile->resource
+	&& terrain_has_resource(pterrain, ptile->resource)) {
+      /* Don't transform away resources. */
+      return -1;
+    }
+
+    activity_mc = pterrain->transform_time;
+    break;
   default:
     die("Invalid connect activity.");
   }
@@ -754,10 +770,17 @@ static void fill_client_goto_parameter(struct unit *punit,
 
   switch (hover_state) {
   case HOVER_CONNECT:
-    if (connect_activity == ACTIVITY_IRRIGATE) {
+    switch (connect_activity) {
+    case ACTIVITY_IRRIGATE:
       parameter->get_costs = get_connect_irrig;
-    } else {
+      break;
+    default:
+      /* FIXME: Warn about unhandled activities. */
+    case ACTIVITY_ROAD:
+    case ACTIVITY_RAILROAD:
+    case ACTIVITY_TRANSFORM:
       parameter->get_costs = get_connect_road;
+      break;
     }
     parameter->get_moves_left_req = NULL;
 
@@ -1187,6 +1210,12 @@ void send_connect_route(enum unit_activity activity)
 	    p.length++;
 	  }
 	}
+	break;
+      case ACTIVITY_TRANSFORM:
+	/* Assume the unit can transform or we wouldn't be here. */
+	p.orders[p.length] = ORDER_ACTIVITY;
+	p.activity[p.length] = ACTIVITY_TRANSFORM;
+	p.length++;
 	break;
       default:
 	die("Invalid connect activity.");

@@ -1053,6 +1053,14 @@ static void connect_irrigation_callback(GtkAction *action, gpointer data)
 }
 
 /****************************************************************
+  Action "CONNECT_TRANSFORM" callback.
+*****************************************************************/
+static void connect_transform_callback(GtkAction *action, gpointer data)
+{
+  key_unit_connect(ACTIVITY_TRANSFORM);
+}
+
+/****************************************************************
   Action "TRANSFORM_TERRAIN" callback.
 *****************************************************************/
 static void transform_terrain_callback(GtkAction *action, gpointer data)
@@ -1537,6 +1545,8 @@ static GtkActionGroup *get_unit_group(void)
        "<Shift>l", NULL, G_CALLBACK(connect_rail_callback)},
       {"CONNECT_IRRIGATION", NULL, _("Connect With Irri_gation"),
        "<Shift>i", NULL, G_CALLBACK(connect_irrigation_callback)},
+      {"CONNECT_TRANSFORM", NULL, _("Connect With _Transform"),
+       "<Shift>f", NULL, G_CALLBACK(connect_transform_callback)},
 
       {"TRANSFORM_TERRAIN", NULL, _("Transf_orm Terrain"),
        "o", NULL, G_CALLBACK(transform_terrain_callback)},
@@ -2130,6 +2140,8 @@ static gboolean update_menus_callback(gpointer data)
                       can_units_do_connect(punits, ACTIVITY_RAILROAD));
   menus_set_sensitive(unit_group, "CONNECT_IRRIGATION",
                       can_units_do_connect(punits, ACTIVITY_IRRIGATE));
+  menus_set_sensitive(unit_group, "CONNECT_TRANSFORM",
+                      can_units_do_connect(punits, ACTIVITY_TRANSFORM));
   menus_set_sensitive(unit_group, "DIPLOMAT_ACTION",
                       can_units_do_diplomat_action(punits,
                                                    DIPLOMAT_ANY_ACTION));
