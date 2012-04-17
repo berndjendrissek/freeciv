@@ -51,18 +51,22 @@
 
 static GtkWidget *dshell;
 static GtkWidget *view;
-static GtkWidget *all_toggle;
 static GtkListStore *store;
 static GtkTreeSelection *selection;
 struct tile *original_tile;
 
-static void update_goto_dialog(GtkToggleButton *button);
+static void update_goto_dialog(GtkToggleButton *button, GtkWidget *dshell);
 static void goto_selection_callback(GtkTreeSelection *selection, gpointer data);
 
 static struct city *get_selected_city(void);
 
 enum {
   CMD_AIRLIFT = 1, CMD_GOTO
+};
+
+struct dshell_controls {
+  GtkToggleButton *all_cities;
+  GtkToggleButton *airport_cities;
 };
 
 /****************************************************************
@@ -120,9 +124,10 @@ static void goto_cmd_callback(GtkWidget *dlg, gint arg)
 **************************************************************************/
 static void create_goto_dialog(void)
 {
-  GtkWidget *sw, *label, *vbox;
+  GtkWidget *sw, *label, *vbox, *button;
   GtkCellRenderer *rend;
   GtkTreeViewColumn *col;
+  struct dshell_controls *controls;
 
   dshell = gtk_dialog_new_with_buttons(_("Goto/Airlift Unit"),
     NULL,
@@ -185,10 +190,24 @@ static void create_goto_dialog(void)
 
   gtk_box_pack_start(GTK_BOX(vbox), sw, TRUE, TRUE, 0);
 
-  all_toggle = gtk_check_button_new_with_mnemonic(_("Show _All Cities"));
-  gtk_box_pack_start(GTK_BOX(vbox), all_toggle, FALSE, FALSE, 0);
+  /* XXX Unleak this if dshell ever gets destroyed. */
+  controls = fc_malloc(sizeof (*controls));
 
-  g_signal_connect(all_toggle, "toggled", G_CALLBACK(update_goto_dialog), NULL);
+  button = gtk_check_button_new_with_mnemonic(_("Show _All Cities"));
+  gtk_box_pack_start(GTK_BOX(vbox), button, FALSE, FALSE, 0);
+  controls->all_cities = GTK_TOGGLE_BUTTON(button);
+
+  g_signal_connect(controls->all_cities, "toggled",
+		   G_CALLBACK(update_goto_dialog), dshell);
+
+  button = gtk_check_button_new_with_mnemonic(_("Show Only Air_ports"));
+  gtk_box_pack_start(GTK_BOX(vbox), button, FALSE, FALSE, 0);
+  controls->airport_cities = GTK_TOGGLE_BUTTON(button);
+
+  g_signal_connect(controls->airport_cities, "toggled",
+		   G_CALLBACK(update_goto_dialog), dshell);
+
+  g_object_set(dshell, "user-data", controls, NULL);
 
   g_signal_connect(selection, "changed",
     G_CALLBACK(goto_selection_callback), NULL);
@@ -199,7 +218,7 @@ static void create_goto_dialog(void)
 
   original_tile = get_center_tile_mapcanvas();
 
-  update_goto_dialog(GTK_TOGGLE_BUTTON(all_toggle));
+  update_goto_dialog(NULL, dshell);
   gtk_tree_view_focus(GTK_TREE_VIEW(view));
 }
 
@@ -240,12 +259,18 @@ static struct city *get_selected_city(void)
 /**************************************************************************
 ...
 **************************************************************************/
-static void update_goto_dialog(GtkToggleButton *button)
+static void update_goto_dialog(GtkToggleButton *button, GtkWidget *dshell)
 {
   GtkTreeIter it;
-  gboolean all_cities;
+  gboolean all_cities, airport_cities;
+  struct dshell_controls *controls;
 
-  all_cities = gtk_toggle_button_get_active(button);
+  g_object_get(dshell, "user-data", &controls, NULL);
+
+  all_cities =
+    gtk_toggle_button_get_active(controls->all_cities);
+  airport_cities =
+    gtk_toggle_button_get_active(controls->airport_cities);
 
   gtk_list_store_clear(store);
 
@@ -255,6 +280,18 @@ static void update_goto_dialog(GtkToggleButton *button)
     }
 
     city_list_iterate(pplayer->cities, pcity) {
+      if (airport_cities) {
+        bool found_airport = FALSE;
+        city_built_iterate(pcity, pimprove) {
+          if (building_has_effect(pimprove, EFT_AIRLIFT)) {
+            found_airport = TRUE;
+            break;
+          }
+        } city_built_iterate_end;
+        if (!found_airport) {
+          continue;
+        }
+      }
       gtk_list_store_append(store, &it);
 
       /* FIXME: should use unit_can_airlift_to(). */
