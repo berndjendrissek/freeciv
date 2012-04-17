@@ -1023,7 +1023,7 @@ static void build_irrigation_callback(GtkAction *action, gpointer data)
 /****************************************************************
   Action "BUILD_MINE" callback.
 *****************************************************************/
-static void build_mine_callack(GtkAction *action, gpointer data)
+static void build_mine_callback(GtkAction *action, gpointer data)
 {
   key_unit_mine();
 }
@@ -1047,7 +1047,7 @@ static void connect_rail_callback(GtkAction *action, gpointer data)
 /****************************************************************
   Action "CONNECT_IRRIGATION" callback.
 *****************************************************************/
-static void connect_irrigation_callack(GtkAction *action, gpointer data)
+static void connect_irrigation_callback(GtkAction *action, gpointer data)
 {
   key_unit_connect(ACTIVITY_IRRIGATE);
 }
@@ -1055,7 +1055,7 @@ static void connect_irrigation_callack(GtkAction *action, gpointer data)
 /****************************************************************
   Action "TRANSFORM_TERRAIN" callback.
 *****************************************************************/
-static void transform_terrain_callack(GtkAction *action, gpointer data)
+static void transform_terrain_callback(GtkAction *action, gpointer data)
 {
   key_unit_transform();
 }
@@ -1529,17 +1529,17 @@ static GtkActionGroup *get_unit_group(void)
       {"BUILD_IRRIGATION", NULL, _("Build _Irrigation"),
        "i", NULL, G_CALLBACK(build_irrigation_callback)},
       {"BUILD_MINE", NULL, _("Build _Mine"),
-       "m", NULL, G_CALLBACK(build_mine_callack)},
+       "m", NULL, G_CALLBACK(build_mine_callback)},
 
       {"CONNECT_ROAD", NULL, _("Connect With Roa_d"),
        "<Shift>r", NULL, G_CALLBACK(connect_road_callback)},
       {"CONNECT_RAIL", NULL, _("Connect With Rai_l"),
        "<Shift>l", NULL, G_CALLBACK(connect_rail_callback)},
       {"CONNECT_IRRIGATION", NULL, _("Connect With Irri_gation"),
-       "<Shift>i", NULL, G_CALLBACK(connect_irrigation_callack)},
+       "<Shift>i", NULL, G_CALLBACK(connect_irrigation_callback)},
 
       {"TRANSFORM_TERRAIN", NULL, _("Transf_orm Terrain"),
-       "o", NULL, G_CALLBACK(transform_terrain_callack)},
+       "o", NULL, G_CALLBACK(transform_terrain_callback)},
       {"CLEAN_POLLUTION", NULL, _("Clean _Pollution"),
        "p", NULL, G_CALLBACK(clean_pollution_callback)},
       {"CLEAN_FALLOUT", NULL, _("Clean _Nuclear Fallout"),
