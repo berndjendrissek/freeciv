@@ -798,6 +798,11 @@ static struct client_option options[] = {
                   N_("Cities layer"),
                   N_("Enabling this will draw cities on the overview."),
                   COC_OVERVIEW, GUI_LAST, TRUE, overview_redraw_callback),
+  GEN_BOOL_OPTION(overview.layers[OLAYER_ATTENTION],
+                  N_("Attention layer"),
+                  N_("Enabling this will draw sites needing attention "
+		     "on the overview."),
+                  COC_OVERVIEW, GUI_LAST, TRUE, overview_redraw_callback),
   GEN_BOOL_OPTION(overview.fog,
                   N_("Overview fog of war"),
                   N_("Enabling this will show fog of war on the "
