@@ -490,7 +490,9 @@ static int get_activity_time(const struct tile *ptile,
       return -1;
     }
 
-    if (tile_has_special(ptile, S_IRRIGATION)) {
+    if ((tile_has_special(ptile, S_IRRIGATION)
+	 && !player_knows_techs_with_flag(pplayer, TF_FARMLAND))
+	|| tile_has_special(ptile, S_FARMLAND)) {
       break;
     }
 
@@ -1163,6 +1165,7 @@ void send_connect_route(enum unit_activity activity)
     struct tile *old_tile;
     struct pf_path *path = NULL;
     struct part *last_part = &goto_map->parts[goto_map->num_parts - 1];
+    struct player *pplayer = unit_owner(punit);
 
     if (last_part->end_tile == last_part->start_tile) {
       /* Cannot move there */
@@ -1187,7 +1190,9 @@ void send_connect_route(enum unit_activity activity)
     for (i = 0; i < path->length; i++) {
       switch (activity) {
       case ACTIVITY_IRRIGATE:
-	if (!tile_has_special(old_tile, S_IRRIGATION)) {
+	if (!tile_has_special(old_tile, S_IRRIGATION)
+	    || (!tile_has_special(old_tile, S_FARMLAND)
+		&& player_knows_techs_with_flag(pplayer, TF_FARMLAND))) {
 	  /* Assume the unit can irrigate or we wouldn't be here. */
 	  p.orders[p.length] = ORDER_ACTIVITY;
 	  p.activity[p.length] = ACTIVITY_IRRIGATE;
