@@ -36,6 +36,7 @@ struct overview overview = {
   .layers = {[OLAYER_BACKGROUND] = TRUE,
 	     [OLAYER_UNITS] = TRUE,
 	     [OLAYER_CITIES] = TRUE,
+	     [OLAYER_ATTENTION] = TRUE,
 	     [OLAYER_BORDERS_ON_OCEAN] = TRUE}
 };
 
@@ -113,6 +114,11 @@ static void gui_to_overview_pos(const struct tileset *t,
 ****************************************************************************/
 static struct color *overview_tile_color(struct tile *ptile)
 {
+  if (overview.layers[OLAYER_ATTENTION]) {
+    if (tile_has_special(ptile, S_POLLUTION)) {
+      return get_color(tileset, COLOR_OVERVIEW_POLLUTION);
+    }
+  }
   if (overview.layers[OLAYER_CITIES]) {
     struct city *pcity = tile_city(ptile);
 

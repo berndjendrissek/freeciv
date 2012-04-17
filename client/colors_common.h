@@ -82,30 +82,32 @@ struct rgbcolor;
 #define SPECENUM_VALUE21NAME  "overview_ground"
 #define SPECENUM_VALUE22  COLOR_OVERVIEW_VIEWRECT     /* white */
 #define SPECENUM_VALUE22NAME  "overview_viewrect"
+#define SPECENUM_VALUE23  COLOR_OVERVIEW_POLLUTION    /* brown */
+#define SPECENUM_VALUE23NAME  "overview_pollution"
 /* Reqtree colors */
-#define SPECENUM_VALUE23  COLOR_REQTREE_RESEARCHING         /* cyan */
-#define SPECENUM_VALUE23NAME  "reqtree_researching"
-#define SPECENUM_VALUE24  COLOR_REQTREE_KNOWN               /* green */
-#define SPECENUM_VALUE24NAME  "reqtree_known"
-#define SPECENUM_VALUE25  COLOR_REQTREE_GOAL_PREREQS_KNOWN
-#define SPECENUM_VALUE25NAME  "reqtree_goal_prereqs_known"
-#define SPECENUM_VALUE26  COLOR_REQTREE_GOAL_UNKNOWN
-#define SPECENUM_VALUE26NAME  "reqtree_goal_unknown"
-#define SPECENUM_VALUE27  COLOR_REQTREE_PREREQS_KNOWN       /* yellow */
-#define SPECENUM_VALUE27NAME  "reqtree_prereqs_known"
-#define SPECENUM_VALUE28  COLOR_REQTREE_UNKNOWN             /* red */
-#define SPECENUM_VALUE28NAME  "reqtree_unknown"
-#define SPECENUM_VALUE29  COLOR_REQTREE_UNREACHABLE
-#define SPECENUM_VALUE29NAME  "reqtree_unreachable"
-#define SPECENUM_VALUE30  COLOR_REQTREE_BACKGROUND          /* black */
-#define SPECENUM_VALUE30NAME  "reqtree_background"
-#define SPECENUM_VALUE31  COLOR_REQTREE_TEXT                /* black */
-#define SPECENUM_VALUE31NAME  "reqtree_text"
-#define SPECENUM_VALUE32  COLOR_REQTREE_EDGE                /* gray */
-#define SPECENUM_VALUE32NAME  "reqtree_edge"
+#define SPECENUM_VALUE24  COLOR_REQTREE_RESEARCHING         /* cyan */
+#define SPECENUM_VALUE24NAME  "reqtree_researching"
+#define SPECENUM_VALUE25  COLOR_REQTREE_KNOWN               /* green */
+#define SPECENUM_VALUE25NAME  "reqtree_known"
+#define SPECENUM_VALUE26  COLOR_REQTREE_GOAL_PREREQS_KNOWN
+#define SPECENUM_VALUE26NAME  "reqtree_goal_prereqs_known"
+#define SPECENUM_VALUE27  COLOR_REQTREE_GOAL_UNKNOWN
+#define SPECENUM_VALUE27NAME  "reqtree_goal_unknown"
+#define SPECENUM_VALUE28  COLOR_REQTREE_PREREQS_KNOWN       /* yellow */
+#define SPECENUM_VALUE28NAME  "reqtree_prereqs_known"
+#define SPECENUM_VALUE29  COLOR_REQTREE_UNKNOWN             /* red */
+#define SPECENUM_VALUE29NAME  "reqtree_unknown"
+#define SPECENUM_VALUE30  COLOR_REQTREE_UNREACHABLE
+#define SPECENUM_VALUE30NAME  "reqtree_unreachable"
+#define SPECENUM_VALUE31  COLOR_REQTREE_BACKGROUND          /* black */
+#define SPECENUM_VALUE31NAME  "reqtree_background"
+#define SPECENUM_VALUE32  COLOR_REQTREE_TEXT                /* black */
+#define SPECENUM_VALUE32NAME  "reqtree_text"
+#define SPECENUM_VALUE33  COLOR_REQTREE_EDGE                /* gray */
+#define SPECENUM_VALUE33NAME  "reqtree_edge"
 /* Player dialog */
-#define SPECENUM_VALUE33  COLOR_PLAYER_COLOR_BACKGROUND     /* black */
-#define SPECENUM_VALUE33NAME  "playerdlg_background"
+#define SPECENUM_VALUE34  COLOR_PLAYER_COLOR_BACKGROUND     /* black */
+#define SPECENUM_VALUE34NAME  "playerdlg_background"
 
 #define SPECENUM_COUNT    COLOR_LAST
 #include "specenum_gen.h"

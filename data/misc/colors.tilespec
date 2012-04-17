@@ -75,6 +75,9 @@ overview_ground = {"r", "g", "b"
 overview_viewrect = {"r", "g", "b"
     255, 255, 255
 }
+overview_pollution = {"r", "g", "b"
+    192, 64, 64
+}
 
 ; Reqtree
 reqtree_known = {"r", "g", "b"
