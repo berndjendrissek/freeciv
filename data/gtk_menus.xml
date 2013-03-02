@@ -63,6 +63,7 @@
       <menuitem action="FULL_SCREEN" />
       <separator />
       <menuitem action="CENTER_VIEW" />
+      <menuitem action="ANTIPODE" />
     </menu>
 
     <menu action="MENU_SELECT">

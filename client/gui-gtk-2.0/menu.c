@@ -1182,6 +1182,42 @@ static void center_view_callback(GtkAction *action, gpointer data)
 }
 
 /****************************************************************
+  Action "ANTIPODE" callback.
+*****************************************************************/
+static void antipode_callback(GtkAction *action, gpointer data)
+{
+  int nat_dx, nat_dy;
+  int antipode_x, antipode_y;
+  int nat_x, nat_y;
+  struct tile *center_tile, *antipode;
+
+  center_tile = get_center_tile_mapcanvas();
+
+  MAP_TO_NATIVE_POS(&nat_x, &nat_y,
+		    center_tile->x, center_tile->y);
+
+  if (topo_has_flag(TF_WRAPX)) {
+    nat_dx = MAP_WIDTH/2 / 2;
+  } else {
+    nat_dx = MAP_WIDTH/2 - 2 * nat_x;
+  }
+
+  if (topo_has_flag(TF_WRAPY)) {
+    nat_dy = MAP_HEIGHT / 2;
+  } else {
+    nat_dy = MAP_HEIGHT - 2 * nat_y;
+  }
+
+  nat_x = FC_WRAP(nat_x + nat_dx, NATIVE_WIDTH);
+  nat_y = FC_WRAP(nat_y + nat_dy, NATIVE_HEIGHT);
+  NATIVE_TO_MAP_POS(&antipode_x, &antipode_y, nat_x, nat_y);
+
+  antipode = nearest_real_tile(antipode_x, antipode_y);
+
+  center_tile_mapcanvas(antipode);
+}
+
+/****************************************************************
   Action "REPORT_UNITS" callback.
 *****************************************************************/
 static void report_units_callback(GtkAction *action, gpointer data)
@@ -1627,6 +1663,8 @@ static GtkActionGroup *get_player_group(void)
       /* View menu. */
       {"CENTER_VIEW", NULL, _("_Center View"),
        "c", NULL, G_CALLBACK(center_view_callback)},
+      {"ANTIPODE", NULL, _("_Antipode"),
+       "exclam", NULL, G_CALLBACK(antipode_callback)},
 
       /* Civilization menu. */
       {"REPORT_UNITS", NULL, _("_Units"),
