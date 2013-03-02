@@ -3246,12 +3246,20 @@ bool execute_orders(struct unit *punit)
       if ((activity == ACTIVITY_BASE && !can_unit_do_activity_base(punit, base))
           || (activity != ACTIVITY_BASE
               && !can_unit_do_activity(punit, activity))) {
-        cancel_orders(punit, "  orders canceled because of failed activity");
-        notify_player(pplayer, unit_tile(punit), E_UNIT_ORDERS, ftc_server,
-                      _("Orders for %s aborted since they "
-                        "give an invalid activity."),
-                      unit_link(punit));
-        return TRUE;
+	if (can_unit_skip_activity_at(punit, activity, punit->tile, base)) {
+	  notify_player(pplayer, unit_tile(punit), E_UNIT_ORDERS, ftc_server,
+			_("Orders for %s skipped since they have already been "
+			  "completed (perhaps by another unit)."),
+			unit_link(punit));
+	  break;
+	}
+
+	cancel_orders(punit, "  orders canceled because of failed activity");
+	notify_player(pplayer, unit_tile(punit), E_UNIT_ORDERS, ftc_server,
+		      _("Orders for %s aborted since they "
+			"give an invalid activity."),
+		      unit_link(punit));
+	return TRUE;
       }
       punit->done_moving = TRUE;
 

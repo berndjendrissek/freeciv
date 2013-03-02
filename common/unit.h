@@ -247,6 +247,10 @@ bool can_unit_do_activity_targeted(const struct unit *punit,
 				   enum unit_activity activity,
 				   enum tile_special_type target,
                                    Base_type_id base);
+bool can_unit_skip_activity_at(const struct unit *punit,
+			       enum unit_activity activity,
+			       const struct tile *ptile,
+			       Base_type_id base);
 bool can_unit_do_activity_targeted_at(const struct unit *punit,
 				      enum unit_activity activity,
 				      enum tile_special_type target,

@@ -770,6 +770,53 @@ bool can_unit_do_activity_targeted(const struct unit *punit,
 					  punit->tile, base);
 }
 
+bool can_unit_skip_activity_at(const struct unit *punit,
+			       enum unit_activity activity,
+			       const struct tile *ptile,
+			       Base_type_id base)
+{
+  switch(activity) {
+  case ACTIVITY_IDLE:
+  case ACTIVITY_GOTO:
+    return TRUE;
+
+  case ACTIVITY_POLLUTION:
+    return !tile_has_special(ptile, S_POLLUTION);
+  case ACTIVITY_FALLOUT:
+    return !tile_has_special(ptile, S_FALLOUT);
+  case ACTIVITY_ROAD:
+    return tile_has_special(ptile, S_ROAD);
+  case ACTIVITY_MINE:
+    return tile_has_special(ptile, S_MINE);
+  case ACTIVITY_IRRIGATE:
+    return tile_has_special(ptile, S_IRRIGATION);
+  case ACTIVITY_RAILROAD:
+    return tile_has_special(ptile, S_RAILROAD);
+
+  case ACTIVITY_BASE:
+    return tile_has_base(ptile, base_by_number(base));
+
+  case ACTIVITY_FORTIFYING:
+  case ACTIVITY_FORTIFIED:
+  case ACTIVITY_SENTRY:
+  case ACTIVITY_PILLAGE:
+  case ACTIVITY_EXPLORE:
+  case ACTIVITY_TRANSFORM:
+    return FALSE;
+
+  case ACTIVITY_FORTRESS:
+  case ACTIVITY_AIRBASE:
+  case ACTIVITY_PATROL_UNUSED:
+  case ACTIVITY_LAST:
+  case ACTIVITY_UNKNOWN:
+    break;
+  }
+  freelog(LOG_ERROR,
+	  "can_unit_do_activity_targeted_at() unknown activity %d",
+	  activity);
+  return FALSE;
+}
+
 /**************************************************************************
   Return TRUE if the unit can do the targeted activity at the given
   location.
