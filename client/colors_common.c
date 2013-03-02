@@ -80,6 +80,7 @@ char *color_names[] = {
   "overview_ground",
   "overview_viewrect",
   "overview_pollution",
+  "overview_fallout",
 
   /* Reqtree */
   "reqtree_researching",

@@ -55,6 +55,7 @@ enum color_std {
   COLOR_OVERVIEW_LAND, /* ground/green */
   COLOR_OVERVIEW_VIEWRECT, /* white */
   COLOR_OVERVIEW_POLLUTION, /* brown */
+  COLOR_OVERVIEW_FALLOUT, /* yellower brown */
 
   /* Reqtree colors */
   COLOR_REQTREE_RESEARCHING, /* cyan */

@@ -118,6 +118,9 @@ static struct color *overview_tile_color(struct tile *ptile)
     if (tile_has_special(ptile, S_POLLUTION)) {
       return get_color(tileset, COLOR_OVERVIEW_POLLUTION);
     }
+    if (tile_has_special(ptile, S_FALLOUT)) {
+      return get_color(tileset, COLOR_OVERVIEW_FALLOUT);
+    }
   }
   if (overview.layers[OLAYER_CITIES]) {
     struct city *pcity = tile_city(ptile);

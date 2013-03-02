@@ -143,6 +143,9 @@ overview_viewrect = {"r", "g", "b"
 overview_pollution = {"r", "g", "b"
     192, 64, 64
 }
+overview_fallout = {"r", "g", "b"
+    192, 96, 32
+}
 
 ; Reqtree
 reqtree_known = {"r", "g", "b"
