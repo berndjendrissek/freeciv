@@ -1114,7 +1114,7 @@ bool can_unit_do_connect(struct unit *punit, enum unit_activity activity)
 		    && !is_activity_on_tile(punit->tile, ACTIVITY_MINE))));
   case ACTIVITY_TRANSFORM:
     return (terrain_control.may_transform
-	    && unit_has_type_flag(punit, F_SETTLERS));
+	    && unit_has_type_flag(punit, F_TRANSFORM));
   default:
     break;
   }
