@@ -280,17 +280,9 @@ static void update_goto_dialog(GtkToggleButton *button, GtkWidget *dshell)
     }
 
     city_list_iterate(pplayer->cities, pcity) {
-      if (airport_cities) {
-        bool found_airport = FALSE;
-        city_built_iterate(pcity, pimprove) {
-          if (building_has_effect(pimprove, EFT_AIRLIFT)) {
-            found_airport = TRUE;
-            break;
-          }
-        } city_built_iterate_end;
-        if (!found_airport) {
-          continue;
-        }
+      if (airport_cities && !get_city_bonus(pcity, EFT_AIRLIFT)) {
+        /* Add only cities that can airlift. */
+        continue;
       }
       gtk_list_store_append(store, &it);
 
