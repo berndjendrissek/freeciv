@@ -95,6 +95,7 @@
       <separator />
       <menuitem action="UNIT_HOMECITY" />
       <menuitem action="UNIT_UPGRADE" />
+      <separator />
       <menuitem action="UNIT_DISBAND" />
     </menu>
 
