@@ -292,6 +292,7 @@ BV_DEFINE(bv_bases, MAX_BASE_TYPES);
 
 enum gui_type {
   GUI_STUB,
+  GUI_CONSOLE,
   GUI_GTK2,
   GUI_SDL,
   GUI_XAW,

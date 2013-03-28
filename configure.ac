@@ -111,7 +111,7 @@ dnl auto: Autodetect one.
 dnl all:  Autodetect as many as possible.
 dnl comma-separated-list: Detect these or abort.
 AC_ARG_ENABLE(client,
-[  --enable-client[=auto/all/gtk/sdl/xaw/win32/ftwl/stub)]
+[  --enable-client[=auto/all/gtk/sdl/xaw/win32/ftwl/console/stub)]
                           clients to compile [[auto]] (or list for multiple)],
 [clients=${enableval}],
 [client=auto])
@@ -122,6 +122,7 @@ gui_xaw=no
 gui_win32=no
 gui_ftwl=no
 gui_beos=no
+gui_console=no
 gui_stub=no
 
 dnl AC_PROG_SED is available only in autoconf 2.60 and later.
@@ -612,6 +613,21 @@ if test "x$client" != "xno"; then
   dnl Win32-specific overrides
   FC_WIN32_CLIENT
 
+  dnl Console-specific overrides
+  if test "x$gui_console" = "xyes" || test "x$client" = "xall" ; then
+    found_client=yes
+
+    if test "x$found_client" = "xyes"; then
+      gui_console=yes
+      if test "x$client" = "xauto" ; then
+        client=yes
+      fi
+      GUI_console_LIBS="-lm"
+    elif test "x$gui_console" = "xyes"; then
+      AC_MSG_ERROR(specified client 'console' not configurable)
+    fi
+  fi
+
   dnl Stub-specific overrides
   if test "x$gui_stub" = "xyes" || test "x$client" = "xall" ; then
     found_client=yes
@@ -643,6 +659,7 @@ if test "x$client" = "xall" ; then
      test "x$gui_ftwl" = "xyes" ||
      test "x$gui_win32" = "xyes" ||
      test "x$gui_beos" = "xyes" ||
+     test "x$gui_console" = "xyes" ||
      test "x$gui_stub" = "xyes" ; then
     client=yes
   else
@@ -685,6 +702,10 @@ AC_SUBST([GUI_win32_CFLAGS])
 AC_SUBST([GUI_win32_CXXFLAGS])
 AC_SUBST([GUI_win32_LIBS])
 AC_SUBST([GUI_win32_LDFLAGS])
+AC_SUBST([GUI_console_CFLAGS])
+AC_SUBST([GUI_console_CXXFLAGS])
+AC_SUBST([GUI_console_LIBS])
+AC_SUBST([GUI_console_LDFLAGS])
 AC_SUBST([GUI_stub_CFLAGS])
 AC_SUBST([GUI_stub_CXXFLAGS])
 AC_SUBST([GUI_stub_LIBS])
@@ -703,6 +724,7 @@ AM_CONDITIONAL(AUDIO_SDL, test "x$SDL_mixer" = "xyes")
 AM_CONDITIONAL(CLIENT_GUI_SDL, test "x$gui_sdl" = "xyes")
 AM_CONDITIONAL(CLIENT_GUI_GTK_2_0, test "x$gui_gtk2" = "xyes")
 AM_CONDITIONAL(CLIENT_GUI_XAW, test "x$gui_xaw" = "xyes")
+AM_CONDITIONAL(CLIENT_GUI_CONSOLE, test "x$gui_console" = "xyes")
 AM_CONDITIONAL(CLIENT_GUI_STUB, test "x$gui_stub" = "xyes")
 AM_CONDITIONAL(CLIENT_GUI_WIN32, test "x$gui_win32" = "xyes")
 AM_CONDITIONAL(CLIENT_GUI_FTWL, test "x$gui_ftwl" = "xyes")
@@ -1025,6 +1047,7 @@ AC_CONFIG_FILES([Makefile
 	  client/gui-xaw/Makefile
 	  client/gui-win32/Makefile
 	  client/gui-ftwl/Makefile
+	  client/gui-console/Makefile
 	  client/gui-stub/Makefile
 	  server/Makefile
 	  server/generator/Makefile
@@ -1093,6 +1116,7 @@ AC_MSG_NOTICE([
     Xaw:     $gui_xaw
     Win32:   $gui_win32
     FTWL:    $gui_ftwl
+    Console: $gui_console
     Stub:    $gui_stub
 
   Build freeciv server:    $server
