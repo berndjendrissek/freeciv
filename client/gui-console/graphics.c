@@ -21,15 +21,11 @@
 
 #include "graphics.h"
 
-struct sprite *intro_gfx_sprite;
-struct sprite *radar_gfx_sprite;
-
 /****************************************************************************
   Return whether the client supports isometric view (isometric tilesets).
 ****************************************************************************/
 bool isometric_view_supported(void)
 {
-  /* PORTME */
   return FALSE;
 }
 
@@ -38,8 +34,7 @@ bool isometric_view_supported(void)
 ****************************************************************************/
 bool overhead_view_supported(void)
 {
-  /* PORTME */
-  return FALSE;
+  return TRUE;
 }
 
 /****************************************************************************
@@ -47,9 +42,6 @@ bool overhead_view_supported(void)
 ****************************************************************************/
 void load_intro_gfx(void)
 {
-  /* PORTME */
-  intro_gfx_sprite = load_gfxfile(tileset_main_intro_filename(tileset));
-  radar_gfx_sprite = load_gfxfile(tileset_mini_intro_filename(tileset));
 }
 
 /****************************************************************************
@@ -58,7 +50,6 @@ void load_intro_gfx(void)
 ****************************************************************************/
 void load_cursors(void)
 {
-  /* PORTME */
 }
 
 /****************************************************************************
@@ -66,12 +57,4 @@ void load_cursors(void)
 ****************************************************************************/
 void free_intro_radar_sprites(void)
 {
-  if (intro_gfx_sprite) {
-    free_sprite(intro_gfx_sprite);
-    intro_gfx_sprite = NULL;
-  }
-  if (radar_gfx_sprite) {
-    free_sprite(radar_gfx_sprite);
-    radar_gfx_sprite = NULL;
-  }
 }
