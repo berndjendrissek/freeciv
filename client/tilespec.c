@@ -473,7 +473,7 @@ static void sprite_hash_free_key(void *key)
 ****************************************************************************/
 const char *tileset_get_name(const struct tileset *t)
 {
-  return t->name;
+  return t ? t->name : "";
 }
 
 /****************************************************************************
@@ -918,12 +918,11 @@ void tilespec_try_read(const char *tileset_name, bool verbose)
     }
     free(list);
 
-    if (!tileset) {
-      freelog(LOG_FATAL, _("No usable default tileset found, aborting!"));
-      exit(EXIT_FAILURE);
+    if (tileset) {
+      freelog(LOG_VERBOSE, "Trying tileset \"%s\".", tileset->name);
+    } else {
+      freelog(LOG_VERBOSE, _("No usable default tileset found, aborting!"));
     }
-
-    freelog(LOG_VERBOSE, "Trying tileset \"%s\".", tileset->name);
   }
   sz_strlcpy(default_tileset_name, tileset_get_name(tileset));
 }
@@ -1116,9 +1115,8 @@ static void ensure_big_sprite(struct specfile *sf)
   sf->big_sprite = load_gfx_file(gfx_filename);
 
   if (!sf->big_sprite) {
-    freelog(LOG_FATAL, "Could not load gfx file for the spec file \"%s\".",
+    freelog(LOG_VERBOSE, "Could not load gfx file for the spec file \"%s\".",
 	    sf->file_name);
-    exit(EXIT_FAILURE);
   }
   section_file_free(file);
 }
@@ -1285,9 +1283,8 @@ static char *tilespec_gfx_filename(const char *gfx_filename)
     }
   }
 
-  freelog(LOG_FATAL, "Couldn't find a supported gfx file extension for \"%s\".",
+  freelog(LOG_ERROR, "Couldn't find a supported gfx file extension for \"%s\".",
          gfx_filename);
-  exit(EXIT_FAILURE);
   return NULL;
 }
 
@@ -1838,9 +1835,9 @@ static struct sprite *load_sprite(struct tileset *t, const char *tag_name)
     if (ss->file) {
       ss->sprite = load_gfx_file(ss->file);
       if (!ss->sprite) {
-	freelog(LOG_FATAL, "Couldn't load gfx file \"%s\" for sprite '%s'.",
+	freelog(LOG_VERBOSE, "Couldn't load gfx file \"%s\" for sprite '%s'.",
 		ss->file, tag_name);
-	exit(EXIT_FAILURE);
+	return NULL;
       }
     } else {
       int sf_w, sf_h;
@@ -1974,8 +1971,7 @@ void tileset_setup_specialist_type(struct tileset *t, Specialist_type_id id)
   }
   t->sprites.specialist[id].count = j;
   if (j == 0) {
-    freelog(LOG_FATAL, "No graphics for specialist \"%s\".", name);
-    exit(EXIT_FAILURE);
+    freelog(LOG_VERBOSE, "No graphics for specialist \"%s\".", name);
   }
 }
 
@@ -2000,8 +1996,7 @@ static void tileset_setup_citizen_types(struct tileset *t)
     }
     t->sprites.citizen[i].count = j;
     if (j == 0) {
-      freelog(LOG_FATAL, "No graphics for citizen \"%s\".", name);
-      exit(EXIT_FAILURE);
+      freelog(LOG_VERBOSE, "No graphics for citizen \"%s\".", name);
     }
   }
 }
@@ -2377,8 +2372,7 @@ static void tileset_lookup_sprite_tags(struct tileset *t)
     sprite_vector_append(&t->sprites.citybar.occupancy, &sprite);
   }
   if (t->sprites.citybar.occupancy.size < 2) {
-    freelog(LOG_FATAL, "Missing necessary citybar.occupancy_N sprites.");
-    exit(EXIT_FAILURE);
+    freelog(LOG_VERBOSE, "Missing necessary citybar.occupancy_N sprites.");
   }
 
 #define SET_EDITOR_SPRITE(x) SET_SPRITE(editor.x, "editor." #x)
@@ -2457,8 +2451,7 @@ static void tileset_lookup_sprite_tags(struct tileset *t)
     sprite_vector_append(&t->sprites.colors.overlays, &sprite);
   }
   if (i == 0) {
-    freelog(LOG_FATAL, "Missing overlay-color sprite colors.overlay_0.");
-    exit(EXIT_FAILURE);
+    freelog(LOG_VERBOSE, "Missing overlay-color sprite colors.overlay_0.");
   }
 
   /* Chop up and build the overlay graphics. */
@@ -2579,8 +2572,8 @@ static void tileset_lookup_sprite_tags(struct tileset *t)
       int offsets[4][2] = {{W / 2, 0}, {0, H / 2}, {W / 2, H / 2}, {0, 0}};
 
       if (!darkness) {
-	freelog(LOG_FATAL, "Sprite tx.darkness missing.");
-	exit(EXIT_FAILURE);
+	freelog(LOG_VERBOSE, "Sprite tx.darkness missing.");
+	break;
       }
       for (i = 0; i < 4; i++) {
 	t->sprites.tx.darkness[i] = crop_sprite(darkness, offsets[i][0],
@@ -2706,7 +2699,7 @@ struct sprite* tiles_lookup_sprite_tag_alt(struct tileset *t, int loglevel,
 void tileset_setup_unit_type(struct tileset *t, struct unit_type *ut)
 {
   t->sprites.unittype[utype_index(ut)] =
-    tiles_lookup_sprite_tag_alt(t, LOG_FATAL, ut->graphic_str,
+    tiles_lookup_sprite_tag_alt(t, LOG_VERBOSE, ut->graphic_str,
 				ut->graphic_alt, "unit_type",
 				utype_rule_name(ut));
 
@@ -2811,18 +2804,16 @@ void tileset_setup_base(struct tileset *t,
         && t->sprites.bases[id].middleground == NULL
         && t->sprites.bases[id].foreground == NULL) {
       /* Cannot find alternative graphics either */
-      freelog(LOG_FATAL, "No graphics for base \"%s\" at all!",
+      freelog(LOG_ERROR, "No graphics for base \"%s\" at all!",
               base_rule_name(pbase));
-      exit(EXIT_FAILURE);
     }
   }
 
   t->sprites.bases[id].activity = load_sprite(t, pbase->activity_gfx);
   if (t->sprites.bases[id].activity == NULL) {
-    freelog(LOG_FATAL, "Missing %s building activity tag \"%s\".",
+    freelog(LOG_VERBOSE, "Missing %s building activity tag \"%s\".",
             base_rule_name(pbase),
             pbase->activity_gfx);
-    exit(EXIT_FAILURE);
   }
 }
 
@@ -2847,11 +2838,11 @@ void tileset_setup_tile_type(struct tileset *t,
   if (!draw) {
     draw = hash_lookup_data(t->tile_hash, pterrain->graphic_alt);
     if (!draw) {
-      freelog(LOG_FATAL, "Terrain \"%s\": no graphic tile \"%s\" or \"%s\".",
+      freelog(LOG_VERBOSE, "Terrain \"%s\": no graphic tile \"%s\" or \"%s\".",
 	      terrain_rule_name(pterrain),
 	      pterrain->graphic_str,
 	      pterrain->graphic_alt);
-      exit(EXIT_FAILURE);
+      return;
     }
   }
 
@@ -2881,9 +2872,8 @@ void tileset_setup_tile_type(struct tileset *t,
 	}
 	/* check for base sprite, allowing missing sprites above base */
 	if (0 == i  &&  0 == l) {
-	  freelog(LOG_FATAL, "Missing base sprite tag \"%s\".",
+	  freelog(LOG_ERROR, "Missing base sprite tag \"%s\".",
 		  buffer);
-	  exit(EXIT_FAILURE);
 	}
 	break;
       case MATCH_SAME:
@@ -2894,7 +2884,7 @@ void tileset_setup_tile_type(struct tileset *t,
 		      draw->name,
 		      cardinal_index_str(t, i));
 	  dlp->match[i] =
-	    tiles_lookup_sprite_tag_alt(t, LOG_FATAL, buffer, "",
+	    tiles_lookup_sprite_tag_alt(t, LOG_VERBOSE, buffer, "",
 					"matched terrain",
 					terrain_rule_name(pterrain));
 	}
@@ -2942,7 +2932,7 @@ void tileset_setup_tile_type(struct tileset *t,
 			draw->name,
 			direction4letters[dir]);
 	    dlp->cells[i] =
-	      tiles_lookup_sprite_tag_alt(t, LOG_FATAL, buffer, "",
+	      tiles_lookup_sprite_tag_alt(t, LOG_VERBOSE, buffer, "",
 					  "cell terrain",
 					  terrain_rule_name(pterrain));
 	    break;
@@ -2955,7 +2945,7 @@ void tileset_setup_tile_type(struct tileset *t,
 			(value >> 1) & 1,
 			(value >> 2) & 1);
 	    dlp->cells[i] =
-	      tiles_lookup_sprite_tag_alt(t, LOG_FATAL, buffer, "",
+	      tiles_lookup_sprite_tag_alt(t, LOG_VERBOSE, buffer, "",
 					  "same cell terrain",
 					  terrain_rule_name(pterrain));
 	    break;
@@ -2968,7 +2958,7 @@ void tileset_setup_tile_type(struct tileset *t,
 			tslp->match_types[dlp->match_index[(value >> 1) & 1]][0],
 			tslp->match_types[dlp->match_index[(value >> 2) & 1]][0]);
 	    dlp->cells[i] =
-	      tiles_lookup_sprite_tag_alt(t, LOG_FATAL, buffer, "",
+	      tiles_lookup_sprite_tag_alt(t, LOG_VERBOSE, buffer, "",
 					  "cell pair terrain",
 					  terrain_rule_name(pterrain));
 	    break;
@@ -3127,7 +3117,7 @@ void tileset_setup_government(struct tileset *t,
 			      struct government *gov)
 {
   t->sprites.government[government_index(gov)] =
-    tiles_lookup_sprite_tag_alt(t, LOG_FATAL, gov->graphic_str,
+    tiles_lookup_sprite_tag_alt(t, LOG_VERBOSE, gov->graphic_str,
 				gov->graphic_alt, "government",
 				government_rule_name(gov));
   
@@ -3158,9 +3148,8 @@ void tileset_setup_nation_flag(struct tileset *t,
   }
   if (!flag || !shield) {
     /* Should never get here because of the f.unknown fallback. */
-    freelog(LOG_FATAL, "Nation %s: no national flag.",
+    freelog(LOG_VERBOSE, "Nation %s: no national flag.",
             nation_rule_name(nation));
-    exit(EXIT_FAILURE);
   }
 
   sprite_vector_reserve(&t->sprites.nation_flag, nation_count());
@@ -4633,19 +4622,16 @@ void tileset_setup_city_tiles(struct tileset *t, int style)
 
     for (style = 0; style < game.control.styles_count; style++) {
       if (t->sprites.city.tile->styles[style].land_num_thresholds == 0) {
-	freelog(LOG_FATAL, "City style \"%s\": no city graphics.",
+	freelog(LOG_VERBOSE, "City style \"%s\": no city graphics.",
 		city_style_rule_name(style));
-	exit(EXIT_FAILURE);
       }
       if (t->sprites.city.wall->styles[style].land_num_thresholds == 0) {
-	freelog(LOG_FATAL, "City style \"%s\": no wall graphics.",
+	freelog(LOG_VERBOSE, "City style \"%s\": no wall graphics.",
 		city_style_rule_name(style));
-	exit(EXIT_FAILURE);
       }
       if (t->sprites.city.occupied->styles[style].land_num_thresholds == 0) {
-	freelog(LOG_FATAL, "City style \"%s\": no occupied graphics.",
+	freelog(LOG_VERBOSE, "City style \"%s\": no occupied graphics.",
 		city_style_rule_name(style));
-	exit(EXIT_FAILURE);
       }
     }
   }
