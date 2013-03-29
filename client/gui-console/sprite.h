@@ -16,5 +16,8 @@
 
 #include "sprite_g.h"
 
+struct sprite {
+  char *filename;
+};
 
 #endif				/* FC__SPRITE_H */

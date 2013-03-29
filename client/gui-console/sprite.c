@@ -17,7 +17,9 @@
 
 #include <stdlib.h>
 
+#include "fciconv.h"
 #include "sprite.h"
+#include "mem.h"
 
 /****************************************************************************
   Return a NULL-terminated, permanently allocated array of possible
@@ -45,8 +47,11 @@ const char **gfx_fileextensions(void)
 ****************************************************************************/
 struct sprite *load_gfxfile(const char *filename)
 {
-  /* PORTME */
-  return NULL;
+  struct sprite *sprite = fc_malloc(sizeof (*sprite));
+
+  sprite->filename = mystrdup(filename);
+
+  return sprite;
 }
 
 /****************************************************************************
@@ -75,8 +80,11 @@ struct sprite *crop_sprite(struct sprite *source,
 			   struct sprite *mask,
 			   int mask_offset_x, int mask_offset_y)
 {
-  /* PORTME */
-  return NULL;
+  struct sprite *sprite = fc_malloc(sizeof (*sprite));
+
+  sprite->filename = mystrdup(source->filename);
+
+  return sprite;
 }
 
 /****************************************************************************
@@ -84,11 +92,8 @@ struct sprite *crop_sprite(struct sprite *source,
 ****************************************************************************/
 void get_sprite_dimensions(struct sprite *sprite, int *width, int *height)
 {
-  /* PORTME */
-#if 0
-  *width = sprite->width;
-  *height = sprite->height;
-#endif
+  *width = 0;
+  *height = 0;
 }
 
 /****************************************************************************
@@ -96,5 +101,6 @@ void get_sprite_dimensions(struct sprite *sprite, int *width, int *height)
 ****************************************************************************/
 void free_sprite(struct sprite *s)
 {
-  /* PORTME */
+  FC_FREE(s->filename);
+  FC_FREE(s);
 }
