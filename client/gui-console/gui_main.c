@@ -21,12 +21,24 @@
 
 #include <stdio.h>
 
+#ifdef HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
+#ifdef HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
 /* utility */
 #include "fciconv.h"
 #include "log.h"
+#include "netintf.h"
 
 /* client */
 #include "client_main.h"
+#include "clinet.h"
 #include "editgui_g.h"
 #include "ggz_g.h"
 #include "options.h"
@@ -38,6 +50,14 @@ const char *client_string = "gui-console";
 const char * const gui_character_encoding = "UTF-8";
 const bool gui_use_transliteration = FALSE;
 
+struct {
+  int server;
+  bool server_writable;
+} sockets = {
+  .server = -1,
+  .server_writable = FALSE,
+};
+
 /****************************************************************************
   Called by the tileset code to set the font size that should be used to
   draw the city names and productions.
@@ -45,8 +65,6 @@ const bool gui_use_transliteration = FALSE;
 void set_city_names_font_sizes(int my_city_names_font_size,
 			       int my_city_productions_font_size)
 {
-  freelog(LOG_ERROR, "Unimplemented set_city_names_font_sizes.");
-  /* PORTME */
 }
 
 /**************************************************************************
@@ -54,7 +72,6 @@ void set_city_names_font_sizes(int my_city_names_font_size,
 **************************************************************************/
 void ui_init(void)
 {
-  /* PORTME */
 }
 
 /**************************************************************************
@@ -71,8 +88,75 @@ int main(int argc, char **argv)
 **************************************************************************/
 void ui_main(int argc, char *argv[])
 {
-  /* PORTME */
+  fd_set rfds, wfds;
+  struct timeval timeout;
+  double seconds;
+  int stdin_flags;
+
   fc_fprintf(stderr, "Freeciv rules!\n");
+  set_client_state(C_S_DISCONNECTED);
+
+  stdin_flags = fcntl(0, F_GETFL);
+  if (stdin_flags == -1) {
+    freelog(LOG_ERROR, "Couldn't get stdin file flags. It may still be in blocking mode.");
+  } else if (!(stdin_flags & O_NONBLOCK)) {
+    if (fcntl(0, F_SETFL, stdin_flags | O_NONBLOCK) == -1) {
+      freelog(LOG_ERROR, "Couldn't set stdin to non-blocking mode.");
+    }
+  }
+
+  while (1) {
+    int max_fd = 0;
+    int n_ready;
+
+    MY_FD_ZERO(&rfds);
+    MY_FD_ZERO(&wfds);
+    FD_SET(0, &rfds);
+    if (sockets.server != -1) {
+      FD_SET(sockets.server, &rfds);
+      max_fd = sockets.server;
+      if (sockets.server_writable) {
+	FD_SET(sockets.server, &wfds);
+      }
+    }
+
+    seconds = real_timer_callback();
+    timeout.tv_sec = (long) seconds;
+    timeout.tv_usec = fmod(seconds, 1);
+
+    n_ready = fc_select(max_fd + 1, &rfds, &wfds, NULL, &timeout);
+    if (n_ready > 0) {
+      if (FD_ISSET(sockets.server, &rfds)) {
+	input_from_server(sockets.server);
+      }
+      if (FD_ISSET(0, &rfds)) {
+	static char *buf = NULL;
+	static size_t buf_used = 0, buf_size = 0;
+	ssize_t n_read;
+
+	/* Make room for more console input. */
+	if (buf == NULL || buf_used >= buf_size) {
+	  size_t newsize = buf_size * 2 + 4096;
+	  buf = fc_realloc(buf, newsize);
+	  buf_size = newsize;
+	}
+
+	n_read = read(0, buf + buf_used, buf_size - buf_used);
+	switch (n_read) {
+	case -1:
+	  freelog(LOG_ERROR, "Couldn't read from stdin.");
+	  client_exit();
+	  break;
+	case 0:
+	  client_exit();
+	  break;
+	default:
+	  buf_used += n_read;
+	  break;
+	}
+      }
+    }
+  }
 }
 
 /****************************************************************************
@@ -116,6 +200,11 @@ void sound_bell(void)
   /* PORTME */
 }
 
+static void set_wait_for_writable_socket(struct connection *pc,
+					 bool socket_writable)
+{
+  sockets.server_writable = socket_writable;
+}
 /**************************************************************************
   Wait for data on the given socket.  Call input_from_server() when data
   is ready to be read.
@@ -125,7 +214,8 @@ void sound_bell(void)
 **************************************************************************/
 void add_net_input(int sock)
 {
-  /* PORTME */
+  sockets.server = sock;
+  client.conn.notify_of_writable_data = set_wait_for_writable_socket;
 }
 
 /**************************************************************************
@@ -135,7 +225,7 @@ void add_net_input(int sock)
 **************************************************************************/
 void remove_net_input(void)
 {
-  /* PORTME */
+  sockets.server = -1;
 }
 
 /**************************************************************************
