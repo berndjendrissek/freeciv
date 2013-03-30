@@ -46,6 +46,18 @@
 
 #include "gui_main.h"
 
+struct closure {
+  void (*fn)(void *);
+  void *context;
+};
+
+struct idle_callback {
+  struct closure callback;
+  struct idle_callback *next;
+};
+
+struct idle_callback *idle_callbacks = NULL;
+
 const char *client_string = "gui-console";
 
 const char * const gui_character_encoding = "UTF-8";
@@ -119,6 +131,15 @@ void ui_main(int argc, char *argv[])
       if (sockets.server_writable) {
 	FD_SET(sockets.server, &wfds);
       }
+    }
+
+    /* TODO: Poll sockets and tty to see if we're really idle. */
+    while (idle_callbacks) {
+      struct idle_callback *idle = idle_callbacks;
+
+      idle_callbacks = idle->next;
+      (idle->callback.fn)(idle->callback.context);
+      FC_FREE(idle);
     }
 
     seconds = real_timer_callback();
@@ -292,11 +313,12 @@ void set_unit_icons_more_arrow(bool onoff)
 ****************************************************************************/
 void add_idle_callback(void (callback)(void *), void *data)
 {
-  /* PORTME */
+  struct idle_callback *idle = fc_malloc(sizeof (*idle));
 
-  /* This is a reasonable fallback if it's not ported. */
-  freelog(LOG_ERROR, "Unimplemented add_idle_callback.");
-  (callback)(data);
+  idle->callback.fn = callback;
+  idle->callback.context = data;
+  idle->next = idle_callbacks;
+  idle_callbacks = idle;
 }
 
 /****************************************************************************
