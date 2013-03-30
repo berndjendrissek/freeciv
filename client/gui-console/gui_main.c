@@ -133,6 +133,7 @@ void ui_main(int argc, char *argv[])
 	static char *buf = NULL;
 	static size_t buf_used = 0, buf_size = 0;
 	ssize_t n_read;
+	char *newline;
 
 	/* Make room for more console input. */
 	if (buf == NULL || buf_used >= buf_size) {
@@ -153,6 +154,16 @@ void ui_main(int argc, char *argv[])
 	default:
 	  buf_used += n_read;
 	  break;
+	}
+
+	newline = strchr(buf, '\n');
+	if (newline) {
+	  size_t line_len = newline+1 - buf;
+
+	  *newline = 0;
+	  send_chat(buf);
+	  memmove(buf, buf + line_len, buf_used - line_len);
+	  buf_used -= line_len;
 	}
       }
     }

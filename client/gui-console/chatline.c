@@ -15,6 +15,8 @@
 #include <config.h>
 #endif
 
+#include <stdio.h>
+
 #include "climisc.h"      /* for write_chatline_content */
 
 #include "chatline.h"
@@ -27,7 +29,7 @@ void real_output_window_append(const char *astring,
                                const struct text_tag_list *tags,
                                int conn_id)
 {
-  /* PORTME */
+  puts(astring);
 }
 
 /**************************************************************************
@@ -36,8 +38,7 @@ void real_output_window_append(const char *astring,
 **************************************************************************/
 void log_output_window(void)
 {
-  /* PORTME */
-  write_chatline_content(NULL);
+  /* There is no "output window". */
 }
 
 /**************************************************************************
@@ -45,8 +46,5 @@ void log_output_window(void)
 **************************************************************************/
 void clear_output_window(void)
 {
-  /* PORTME */
-#if 0
-  set_output_window_text(_("Cleared output window."));
-#endif
+  putc('\014', stdout);
 }
