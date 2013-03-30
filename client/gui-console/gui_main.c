@@ -122,7 +122,7 @@ void ui_main(int argc, char *argv[])
 
     seconds = real_timer_callback();
     timeout.tv_sec = (long) seconds;
-    timeout.tv_usec = fmod(seconds, 1);
+    timeout.tv_usec = fmod(seconds, 1) * 1000000UL;
 
     n_ready = fc_select(max_fd + 1, &rfds, &wfds, NULL, &timeout);
     if (n_ready > 0) {
