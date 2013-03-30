@@ -37,6 +37,7 @@
 #include "netintf.h"
 
 /* client */
+#include "chatline_common.h"
 #include "client_main.h"
 #include "clinet.h"
 #include "editgui_g.h"
