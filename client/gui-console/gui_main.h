@@ -16,5 +16,9 @@
 
 #include "gui_main_g.h"
 
+char *next_word(char const **s, char const *ifs);
+void console_command(char const *s);
+
+void console_endturn(int argc, char *argv[], void *context);
 
 #endif				/* FC__GUI_MAIN_H */

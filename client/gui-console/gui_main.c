@@ -34,7 +34,9 @@
 /* utility */
 #include "fciconv.h"
 #include "log.h"
+#include "mem.h"
 #include "netintf.h"
+#include "support.h"
 
 /* client */
 #include "chatline_common.h"
@@ -56,6 +58,12 @@ struct idle_callback {
   struct idle_callback *next;
 };
 
+struct command_handler {
+  char const *command;
+  void (*handler)(int argc, char *argv[], void *context);
+  void *context;
+};
+
 struct idle_callback *idle_callbacks = NULL;
 
 const char *client_string = "gui-console";
@@ -70,6 +78,84 @@ struct {
   .server = -1,
   .server_writable = FALSE,
 };
+
+char *next_word(char const **s, char const *ifs)
+{
+  char const *first_delimiter;
+  char *word;
+
+  if (!*s) {
+    return NULL;
+  }
+
+  *s += strspn(*s, ifs);
+  if (!**s) {
+    return NULL;
+  }
+
+  first_delimiter = strpbrk(*s, ifs);
+  if (first_delimiter) {
+    word = fc_malloc(first_delimiter - *s + 1);
+    mystrlcpy(word, *s, first_delimiter - *s + 1);
+    *s = first_delimiter;
+  } else {
+    word = mystrdup(*s);
+    *s = NULL;
+  }
+
+  return word;
+}
+
+void console_command(char const *s)
+{
+  const char SERVER_COMMAND_PREFIX = '/';
+  struct command_handler const handlers[] = {
+    { "endturn", &console_endturn, NULL },
+    { NULL, NULL, NULL }
+  };
+  char **words;
+  int i, n_words, words_available;
+
+  if (s[0] == SERVER_COMMAND_PREFIX) {
+    send_chat(s);
+    return;
+  }
+
+  words_available = 1;
+  words = fc_malloc(words_available * sizeof (*words));
+  n_words = 0;
+
+  do {
+    if (n_words >= words_available) {
+      words_available *= 2;
+      words = fc_realloc(words, words_available * sizeof (*words));
+    }
+    words[n_words++] = next_word(&s, " \t");
+  } while (words[n_words-1]);
+
+  /* Back up to before the NULL, to give argc/argv semantics. */
+  n_words--;
+
+  if (n_words) {
+    for (i = 0; handlers[i].command; i++) {
+      if (mystrcasecmp(handlers[i].command, words[0]) == 0) {
+	(*handlers[i].handler)(n_words, words, handlers[i].context);
+	break;
+      }
+    }
+  }
+
+  for (i = 0; i < n_words; i++) {
+    FC_FREE(words[i]);
+  }
+
+  FC_FREE(words);
+}
+
+void console_endturn(int argc, char *argv[], void *context)
+{
+  user_ended_turn();
+}
 
 /****************************************************************************
   Called by the tileset code to set the font size that should be used to
@@ -183,7 +269,7 @@ void ui_main(int argc, char *argv[])
 	  size_t line_len = newline+1 - buf;
 
 	  *newline = 0;
-	  send_chat(buf);
+	  console_command(buf);
 	  memmove(buf, buf + line_len, buf_used - line_len);
 	  buf_used -= line_len;
 	}
