@@ -20,6 +20,7 @@
 #endif
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
@@ -33,6 +34,7 @@
 
 /* utility */
 #include "fciconv.h"
+#include "game.h"
 #include "log.h"
 #include "mem.h"
 #include "netintf.h"
@@ -115,6 +117,7 @@ void console_command(char const *s)
     { "lsc", &console_lsc, NULL },
     { "lsu", &console_lsu, NULL },
     { "fullmap", &console_fullmap, NULL },
+    { "statu", &console_statu, NULL },
     { NULL, NULL, NULL }
   };
   char **words;
@@ -248,6 +251,108 @@ void console_fullmap(int argc, char *argv[], void *context)
   }
   fc_printf("\n");
   fc_printf("250 fullmap\n");
+}
+
+void console_statu(int argc, char *argv[], void *context)
+{
+  struct unit *punit;
+  char const *activity_name;
+  int id;
+
+  if (argc < 2) {
+    fc_printf("500 statu needs unit ID\n");
+    return;
+  }
+
+  id = atoi(argv[1]);
+  punit = game_find_unit_by_number(id);
+  if (!punit) {
+    fc_printf("404 Unit %d not found\n", id);
+    return;
+  }
+
+  fc_printf("250- (%d, %d) %s (%s) %d/%d A%d D%d H%d/%d F%d [%s]\n",
+	    TILE_XY(punit->tile),
+	    unit_name_translation(punit),
+	    punit->utype->veteran[punit->veteran].name,
+	    punit->moves_left, punit->utype->move_rate,
+	    punit->utype->attack_strength,
+	    punit->utype->defense_strength,
+	    punit->hp, punit->utype->hp,
+	    punit->utype->firepower,
+	    nation_plural_for_player(punit->owner));
+  switch (punit->activity) {
+  case ACTIVITY_IDLE:
+    activity_name = NULL;
+    break;
+  case ACTIVITY_POLLUTION:
+    activity_name = "Pollution";
+    break;
+  case ACTIVITY_ROAD:
+    activity_name = "Road";
+    break;
+  case ACTIVITY_MINE:
+    activity_name = "Mine";
+    break;
+  case ACTIVITY_IRRIGATE:
+    activity_name = "Irrigate";
+    break;
+  case ACTIVITY_FORTIFIED:
+    activity_name = "Fortified";
+    break;
+  case ACTIVITY_FORTRESS:
+    activity_name = "Fortress";
+    break;
+  case ACTIVITY_SENTRY:
+    activity_name = "Sentry";
+    break;
+  case ACTIVITY_RAILROAD:
+    activity_name = "Railroad";
+    break;
+  case ACTIVITY_PILLAGE:
+    activity_name = "Pillage";
+    break;
+  case ACTIVITY_GOTO:
+    activity_name = "Goto";
+    break;
+  case ACTIVITY_EXPLORE:
+    activity_name = "Explore";
+    break;
+  case ACTIVITY_TRANSFORM:
+    activity_name = "Transform";
+    break;
+  case ACTIVITY_UNKNOWN:
+    activity_name = "Unknown";
+    break;
+  case ACTIVITY_AIRBASE:
+    activity_name = "Airbase";
+    break;
+  case ACTIVITY_FORTIFYING:
+    activity_name = "Fortify";
+    break;
+  case ACTIVITY_FALLOUT:
+    activity_name = "Fallout";
+    break;
+  case ACTIVITY_PATROL_UNUSED:
+    activity_name = "Patrol (unused)";
+    break;
+  case ACTIVITY_BASE:
+    activity_name = "Base";
+    break;
+  case ACTIVITY_LAST:
+    activity_name = "Last (invalid)";
+    break;
+  default:
+    activity_name = "Invalid activity";
+    break;
+  }
+  if (activity_name) {
+    fc_printf("250- %s/%d\n", activity_name, punit->activity_count);
+  }
+  if (punit->goto_tile) {
+    fc_printf("250- goto (%d, %d)\n", TILE_XY(punit->goto_tile));
+  }
+  fc_printf("250 statu %d\n", id);
 }
 
 /****************************************************************************

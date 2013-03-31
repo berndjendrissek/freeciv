@@ -23,5 +23,6 @@ void console_endturn(int argc, char *argv[], void *context);
 void console_lsc(int argc, char *argv[], void *context);
 void console_lsu(int argc, char *argv[], void *context);
 void console_fullmap(int argc, char *argv[], void *context);
+void console_statu(int argc, char *argv[], void *context);
 
 #endif				/* FC__GUI_MAIN_H */
