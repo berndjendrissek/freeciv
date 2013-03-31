@@ -203,9 +203,11 @@ void ui_main(int argc, char *argv[])
   if (stdin_flags == -1) {
     freelog(LOG_ERROR, "Couldn't get stdin file flags. It may still be in blocking mode.");
   } else if (!(stdin_flags & O_NONBLOCK)) {
+#if 0
     if (fcntl(0, F_SETFL, stdin_flags | O_NONBLOCK) == -1) {
       freelog(LOG_ERROR, "Couldn't set stdin to non-blocking mode.");
     }
+#endif
   }
 
   while (1) {
