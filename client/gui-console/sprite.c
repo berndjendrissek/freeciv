@@ -28,12 +28,10 @@
 ****************************************************************************/
 const char **gfx_fileextensions(void)
 {
-  /* PORTME */
-
-  /* hack to allow stub to run */
+  /* We won't really load them anyway so just support them all. */
   static const char *ext[] = {
-    "png",	/* png should be the default. */
-    /* ...etc... */
+    "png",
+    "xpm",
     NULL
   };
 
@@ -49,7 +47,15 @@ struct sprite *load_gfxfile(const char *filename)
 {
   struct sprite *sprite = fc_malloc(sizeof (*sprite));
 
+  fc_fprintf(stderr, "Loading %s\n", filename);
   sprite->filename = mystrdup(filename);
+
+  /*
+   * Just lie, it might convince the generic client code not to break when
+   * it tries to look for sub-images inside a larger graphics file.
+   */
+  sprite->width = 4096;
+  sprite->height = 4096;
 
   return sprite;
 }
@@ -83,6 +89,8 @@ struct sprite *crop_sprite(struct sprite *source,
   struct sprite *sprite = fc_malloc(sizeof (*sprite));
 
   sprite->filename = mystrdup(source->filename);
+  sprite->width = width;
+  sprite->height = height;
 
   return sprite;
 }
@@ -92,8 +100,8 @@ struct sprite *crop_sprite(struct sprite *source,
 ****************************************************************************/
 void get_sprite_dimensions(struct sprite *sprite, int *width, int *height)
 {
-  *width = 0;
-  *height = 0;
+  *width = sprite->width;
+  *height = sprite->height;
 }
 
 /****************************************************************************

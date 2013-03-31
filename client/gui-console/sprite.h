@@ -18,6 +18,8 @@
 
 struct sprite {
   char *filename;
+  int width;
+  int height;
 };
 
 #endif				/* FC__SPRITE_H */
