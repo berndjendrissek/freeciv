@@ -112,6 +112,9 @@ void console_command(char const *s)
   const char SERVER_COMMAND_PREFIX = '/';
   struct command_handler const handlers[] = {
     { "endturn", &console_endturn, NULL },
+    { "lsc", &console_lsc, NULL },
+    { "lsu", &console_lsu, NULL },
+    { "fullmap", &console_fullmap, NULL },
     { NULL, NULL, NULL }
   };
   char **words;
@@ -156,6 +159,95 @@ void console_command(char const *s)
 void console_endturn(int argc, char *argv[], void *context)
 {
   user_ended_turn();
+}
+
+void console_lsc(int argc, char *argv[], void *context)
+{
+  int n;
+
+  n = 0;
+  cities_iterate(pcity) {
+    fc_printf("250- %d. %d (%d, %d) %s%s%s %s [%s]\n",
+	      pcity->id, pcity->size, TILE_XY(pcity->tile),
+	      pcity->client.walls ? "[" : "",
+	      pcity->client.occupied ? "*" : "_",
+	      pcity->client.walls ? "]" : "",
+	      pcity->name, nation_plural_for_player(pcity->owner));
+    n++;
+  } cities_iterate_end;
+  fc_printf("250 %d cities\n", n);
+}
+
+void console_lsu(int argc, char *argv[], void *context)
+{
+  int n_player, n_total;
+
+  n_total = 0;
+  players_iterate(pplayer) {
+    n_player = 0;
+    unit_list_iterate(pplayer->units, punit) {
+      fc_printf("250- %d. (%d, %d) %s (%s) %d/%d [%s]\n",
+		punit->id, TILE_XY(punit->tile),
+		unit_name_translation(punit),
+		punit->utype->veteran[punit->veteran].name,
+		punit->moves_left, punit->utype->move_rate,
+		nation_plural_for_player(punit->owner));
+      n_player++;
+      n_total++;
+    } unit_list_iterate_end;
+    fc_printf("250- %d %s units\n", n_player, nation_adjective_for_player(pplayer));
+  } players_iterate_end;
+  fc_printf("250 %d total units\n", n_total);
+}
+
+void console_fullmap(int argc, char *argv[], void *context)
+{
+  static char *pixels = NULL;
+  static int max_x = 0, max_y = 0;
+  const int rows_per_tile = 1, columns_per_tile = 1;
+  size_t n_pixels;
+  int x, y;
+
+  if (!pixels) {
+    whole_map_iterate(ptile) {
+      if (ptile->x > max_x) {
+	max_x = ptile->x;
+      }
+      if (ptile->y > max_y) {
+	max_y = ptile->y;
+      }
+    } whole_map_iterate_end;
+    fc_printf("250- Allocating pixels %d/%d %d/%d\n", max_x, map.xsize, max_y, map.ysize);
+  }
+
+  n_pixels = (max_x+1)*(max_y+1) * columns_per_tile*rows_per_tile;
+
+  if (!pixels) {
+    pixels = fc_malloc(n_pixels * sizeof (*pixels));
+  }
+
+  memset(pixels, ' ', n_pixels);
+
+  whole_map_iterate(ptile) {
+    char identifier = ptile->terrain ? terrain_name_translation(ptile->terrain)[0] : ' ';
+    int xy = columns_per_tile*(max_x+1)*(rows_per_tile*ptile->y) + columns_per_tile*ptile->x + columns_per_tile/2;
+    pixels[xy] = (identifier ? identifier : ' ');
+  } whole_map_iterate_end;
+
+  fc_printf("250-     ");
+  for (x = 0; x < (max_x+1) * columns_per_tile; x++) {
+    fc_printf("%01d", x % 10);
+  }
+  fc_printf("\n");
+  for (y = 0; y < (max_y+1) * rows_per_tile; y++) {
+    fc_printf("250- %3d %.*s\n", y/rows_per_tile, columns_per_tile*(max_x+1), pixels + columns_per_tile*(max_x+1)*y);
+  }
+  fc_printf("250-     ");
+  for (x = 0; x < (max_x+1) * columns_per_tile; x++) {
+    fc_printf("%01d", x % 10);
+  }
+  fc_printf("\n");
+  fc_printf("250 fullmap\n");
 }
 
 /****************************************************************************
