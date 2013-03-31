@@ -45,6 +45,7 @@
 #include "editgui_g.h"
 #include "ggz_g.h"
 #include "options.h"
+#include "tilespec.h"
 
 #include "gui_main.h"
 
@@ -192,6 +193,9 @@ void ui_main(int argc, char *argv[])
   double seconds;
   int stdin_flags;
 
+  tileset_init(tileset);
+  tileset_load_tiles(tileset);
+
   fc_fprintf(stderr, "Freeciv rules!\n");
   set_client_state(C_S_DISCONNECTED);
 
@@ -257,6 +261,7 @@ void ui_main(int argc, char *argv[])
 	  client_exit();
 	  break;
 	case 0:
+	  tileset_free_tiles(tileset);
 	  client_exit();
 	  break;
 	default:
