@@ -253,11 +253,109 @@ void console_fullmap(int argc, char *argv[], void *context)
   fc_printf("250 fullmap\n");
 }
 
+static char const *console_activity_name(enum unit_activity activity)
+{
+  switch (activity) {
+  case ACTIVITY_IDLE:
+    return "Idle";
+  case ACTIVITY_POLLUTION:
+    return "Pollution";
+  case ACTIVITY_ROAD:
+    return "Road";
+  case ACTIVITY_MINE:
+    return "Mine";
+  case ACTIVITY_IRRIGATE:
+    return "Irrigate";
+  case ACTIVITY_FORTIFIED:
+    return "Fortified";
+  case ACTIVITY_FORTRESS:
+    return "Fortress";
+  case ACTIVITY_SENTRY:
+    return "Sentry";
+  case ACTIVITY_RAILROAD:
+    return "Railroad";
+  case ACTIVITY_PILLAGE:
+    return "Pillage";
+  case ACTIVITY_GOTO:
+    return "Goto";
+  case ACTIVITY_EXPLORE:
+    return "Explore";
+  case ACTIVITY_TRANSFORM:
+    return "Transform";
+  case ACTIVITY_UNKNOWN:
+    return "Unknown";
+  case ACTIVITY_AIRBASE:
+    return "Airbase";
+  case ACTIVITY_FORTIFYING:
+    return "Fortify";
+  case ACTIVITY_FALLOUT:
+    return "Fallout";
+  case ACTIVITY_PATROL_UNUSED:
+    return "Patrol (unused)";
+  case ACTIVITY_BASE:
+    return "Base";
+  case ACTIVITY_LAST:
+    return "Last (invalid)";
+  default:
+    return NULL;
+  }
+}
+
+static char const *console_orders_name(enum unit_orders order)
+{
+  switch (order) {
+  case ORDER_MOVE:
+    return "Move";
+  case ORDER_ACTIVITY:
+    return "Activity";
+  case ORDER_FULL_MP:
+    return "Full MP";
+  case ORDER_BUILD_CITY:
+    return "City";
+  case ORDER_DISBAND:
+    return "Disband";
+  case ORDER_BUILD_WONDER:
+    return "Wonder";
+  case ORDER_TRADE_ROUTE:
+    return "Trade route";
+  case ORDER_HOMECITY:
+    return "Rehome";
+  case ORDER_LAST:
+    return "Last (invalid)";
+  default:
+    return NULL;
+  }
+}
+
+static char const *console_direction_name(enum direction8 dir)
+{
+  switch (dir) {
+  case DIR8_NORTHWEST:
+    return "NW";
+  case DIR8_NORTH:
+    return "N";
+  case DIR8_NORTHEAST:
+    return "NE";
+  case DIR8_WEST:
+    return "W";
+  case DIR8_EAST:
+    return "E";
+  case DIR8_SOUTHWEST:
+    return "SW";
+  case DIR8_SOUTH:
+    return "S";
+  case DIR8_SOUTHEAST:
+    return "SE";
+  default:
+    return NULL;
+  }
+}
 void console_statu(int argc, char *argv[], void *context)
 {
   struct unit *punit;
   char const *activity_name;
   int id;
+  int order_index;
 
   if (argc < 2) {
     fc_printf("500 statu needs unit ID\n");
@@ -283,71 +381,49 @@ void console_statu(int argc, char *argv[], void *context)
 	    nation_plural_for_player(punit->owner));
   switch (punit->activity) {
   case ACTIVITY_IDLE:
-    activity_name = NULL;
-    break;
-  case ACTIVITY_POLLUTION:
-    activity_name = "Pollution";
-    break;
-  case ACTIVITY_ROAD:
-    activity_name = "Road";
-    break;
-  case ACTIVITY_MINE:
-    activity_name = "Mine";
-    break;
-  case ACTIVITY_IRRIGATE:
-    activity_name = "Irrigate";
-    break;
-  case ACTIVITY_FORTIFIED:
-    activity_name = "Fortified";
-    break;
-  case ACTIVITY_FORTRESS:
-    activity_name = "Fortress";
-    break;
-  case ACTIVITY_SENTRY:
-    activity_name = "Sentry";
-    break;
-  case ACTIVITY_RAILROAD:
-    activity_name = "Railroad";
-    break;
-  case ACTIVITY_PILLAGE:
-    activity_name = "Pillage";
-    break;
-  case ACTIVITY_GOTO:
-    activity_name = "Goto";
-    break;
-  case ACTIVITY_EXPLORE:
-    activity_name = "Explore";
-    break;
-  case ACTIVITY_TRANSFORM:
-    activity_name = "Transform";
-    break;
-  case ACTIVITY_UNKNOWN:
-    activity_name = "Unknown";
-    break;
-  case ACTIVITY_AIRBASE:
-    activity_name = "Airbase";
-    break;
-  case ACTIVITY_FORTIFYING:
-    activity_name = "Fortify";
-    break;
-  case ACTIVITY_FALLOUT:
-    activity_name = "Fallout";
-    break;
-  case ACTIVITY_PATROL_UNUSED:
-    activity_name = "Patrol (unused)";
-    break;
-  case ACTIVITY_BASE:
-    activity_name = "Base";
-    break;
-  case ACTIVITY_LAST:
-    activity_name = "Last (invalid)";
     break;
   default:
-    activity_name = "Invalid activity";
+    activity_name = console_activity_name(punit->activity);
+    if (activity_name) {
+      fc_printf("250- %s/%d\n", activity_name, punit->activity_count);
+    }
     break;
   }
-  if (activity_name) {
-    fc_printf("250- %s/%d\n", activity_name, punit->activity_count);
+  for (order_index = 0; order_index < punit->orders.length; order_index++) {
+    char const *cursor = (order_index == punit->orders.index ? " <--" : "");
+
+    switch (punit->orders.list[order_index].order) {
+    case ORDER_ACTIVITY:
+      switch (punit->orders.list[order_index].activity) {
+      case ACTIVITY_BASE:
+	fc_printf("250- Base %d%s\n",
+		  punit->orders.list[order_index].base, cursor);
+	break;
+      default:
+	fc_printf("250- %s%s\n",
+		  console_activity_name(punit->orders.list[order_index].activity),
+		  cursor);
+	break;
+      }
+      break;
+    case ORDER_MOVE:
+      fc_printf("250- Move %s%s\n",
+		console_direction_name(punit->orders.list[order_index].dir),
+		cursor);
+      break;
+    default:
+      fc_printf("250- %s%s\n",
+		console_orders_name(punit->orders.list[order_index].order),
+		cursor);
+      break;
+    }
+  }
+  if (punit->orders.length) {
+    if (punit->orders.repeat) {
+      fc_printf("250- repeat\n");
+    } else {
+      fc_printf("250- end\n");
+    }
   }
   if (punit->goto_tile) {
     fc_printf("250- goto (%d, %d)\n", TILE_XY(punit->goto_tile));
