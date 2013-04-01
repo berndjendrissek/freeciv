@@ -687,6 +687,7 @@ void console_statc(int argc, char *argv[], void *context)
 void console_statu(int argc, char *argv[], void *context)
 {
   struct unit *punit;
+  struct city *pcity;
   char const *activity_name;
   int id;
 
@@ -702,7 +703,8 @@ void console_statu(int argc, char *argv[], void *context)
     return;
   }
 
-  fc_printf("250- (%d, %d) %s (%s) %d/%d A%d D%d H%d/%d F%d [%s]\n",
+  pcity = game_find_city_by_number(punit->homecity);
+  fc_printf("250- (%d, %d) %s (%s) %d/%d A%d D%d H%d/%d F%d [%s%s, %s]\n",
 	    TILE_XY(punit->tile),
 	    unit_name_translation(punit),
 	    punit->utype->veteran[punit->veteran].name,
@@ -711,6 +713,8 @@ void console_statu(int argc, char *argv[], void *context)
 	    punit->utype->defense_strength,
 	    punit->hp, punit->utype->hp,
 	    punit->utype->firepower,
+	    pcity ? "from " : "homeless",
+	    pcity ? pcity->name : "",
 	    nation_plural_for_player(punit->owner));
   switch (punit->activity) {
   case ACTIVITY_IDLE:
