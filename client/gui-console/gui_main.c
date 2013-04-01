@@ -285,6 +285,7 @@ void console_command(char const *s)
 {
   const char SERVER_COMMAND_PREFIX = '/';
   struct command_handler const handlers[] = {
+    { "city", &console_city, NULL },
     { "endturn", &console_endturn, NULL },
     { "focus", &console_focus, NULL },
     { "goto", &console_goto, NULL },
@@ -349,8 +350,15 @@ void console_command(char const *s)
   FC_FREE(words);
 }
 
+void console_city(int argc, char *argv[], void *context)
+{
+  fc_printf("250 city\n");
+  key_unit_build_city();
+}
+
 void console_endturn(int argc, char *argv[], void *context)
 {
+  fc_printf("250 endturn\n");
   user_ended_turn();
 }
 
