@@ -293,6 +293,7 @@ void console_command(char const *s)
     { "lsc", &console_lsc, NULL },
     { "lsu", &console_lsu, NULL },
     { "fullmap", &console_fullmap, NULL },
+    { "statc", &console_statc, NULL },
     { "statu", &console_statu, NULL },
     { "n", &console_move, NULL },
     { "s", &console_move, NULL },
@@ -625,6 +626,62 @@ void console_fullmap(int argc, char *argv[], void *context)
   }
   fc_printf("\n");
   fc_printf("250 fullmap\n");
+}
+
+void console_statc(int argc, char *argv[], void *context)
+{
+  struct city *pcity;
+  int id;
+  int citizen, feeling, specialist, traderoute;
+
+  if (argc < 2) {
+    fc_printf("500 Usage statc CITYID\n");
+    return;
+  }
+
+  id = atoi(argv[1]);
+  pcity = game_find_city_by_number(id);
+  if (!pcity) {
+    fc_printf("404 City %d not found\n", id);
+    return;
+  }
+
+  fc_printf("250- %d (%d, %d) %s%s%s %s [%s <- %s]\n",
+	    pcity->size, TILE_XY(pcity->tile),
+	    pcity->client.walls ? "[" : "",
+	    pcity->client.occupied ? "*" : "_",
+	    pcity->client.walls ? "]" : "",
+	    pcity->name,
+	    nation_plural_for_player(pcity->owner),
+	    nation_plural_for_player(pcity->original));
+  for (citizen = 0; citizen < CITIZEN_LAST; citizen++) {
+    fc_printf("250- Feelings %d:", citizen);
+    for (feeling = 0; feeling < FEELING_LAST; feeling++) {
+      fc_printf(" %d", pcity->feel[citizen][feeling]);
+    }
+    fc_printf("\n");
+  }
+  fc_printf("250- Specialists:");
+  for (specialist = 0; specialist < SP_MAX; specialist++) {
+    fc_printf(" %d", pcity->specialists[specialist]);
+  }
+  fc_printf("\n");
+  for (traderoute = 0; traderoute < NUM_TRADE_ROUTES; traderoute++) {
+    if (pcity->trade[traderoute]) {
+      struct city *trade_partner;
+
+      trade_partner = game_find_city_by_number(pcity->trade[traderoute]);
+
+      fc_printf("250- Trade %d from %d [%s%s%s]\n",
+		pcity->trade_value[traderoute],
+		pcity->trade[traderoute],
+		trade_partner ? trade_partner->name : "Unknown city",
+		trade_partner ? ", " : "",
+		trade_partner ? nation_plural_for_player(trade_partner->owner) : "");
+    }
+  }
+
+  fc_printf("250 statc = %d\n", id);
 }
 
 void console_statu(int argc, char *argv[], void *context)
