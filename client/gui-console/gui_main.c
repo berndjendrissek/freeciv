@@ -333,6 +333,13 @@ void console_command(char const *s)
 	break;
       }
     }
+    if (!handlers[i].command) {
+      fc_printf("500 Usage: ");
+      for (i = 0; handlers[i].command; i++) {
+	fc_printf("%s%s", i ? "|" : "", handlers[i].command);
+      }
+      fc_printf(" [ARGS...]\n");
+    }
   }
 
   for (i = 0; i < n_words; i++) {
@@ -431,6 +438,10 @@ void console_focus(int argc, char *argv[], void *context)
       focus_fn = &add_unit_focus;
     } unit_list_iterate_end;
 
+    fc_printf("250 focus %s = %d/%d\n", argv[1],
+	      unit_list_size(units),
+	      unit_list_size(get_units_in_focus()));
+
     unit_list_free(units);
     break;
   case 'l':
@@ -467,7 +478,7 @@ void console_goto(int argc, char *argv[], void *context)
     console_unit_orders(punit, "250");
     n_units++;
   } unit_list_iterate_end;
-  fc_printf("250 %d units sent to (%d, %d)\n",
+  fc_printf("250 goto = %d (%d, %d)\n",
 	    n_units, TILE_XY(ptile));
 }
 
@@ -488,10 +499,10 @@ void console_hover(int argc, char *argv[], void *context)
   control_mouse_cursor(ptile);
 
   if (ptile->terrain) {
-    fc_printf("250 Hover (%d, %d) %s\n",
+    fc_printf("250 hover = (%d, %d) %s\n",
 	      TILE_XY(ptile), terrain_name_translation(ptile->terrain));
   } else {
-    fc_printf("250 Hover (%d, %d) [Unknown]\n",
+    fc_printf("250 hover = (%d, %d) [Unknown]\n",
 	      TILE_XY(ptile));
   }
 }
@@ -510,7 +521,7 @@ void console_lsc(int argc, char *argv[], void *context)
 	      pcity->name, nation_plural_for_player(pcity->owner));
     n++;
   } cities_iterate_end;
-  fc_printf("250 %d cities\n", n);
+  fc_printf("250 lsc = %d\n", n);
 }
 
 void console_lsu(int argc, char *argv[], void *context)
@@ -527,7 +538,7 @@ void console_lsu(int argc, char *argv[], void *context)
     } unit_list_iterate_end;
     fc_printf("250- %d %s units\n", n_player, nation_adjective_for_player(pplayer));
   } players_iterate_end;
-  fc_printf("250 %d total units\n", n_total);
+  fc_printf("250 lsu = %d\n", n_total);
 }
 
 void console_move(int argc, char *argv[], void *context)
@@ -555,7 +566,7 @@ void console_move(int argc, char *argv[], void *context)
     }
   }
 
-  fc_printf("500 No such direction: %s\n", argv[0]);
+  fc_printf("500 Usage: n|s|w|e|nw|ne|sw|se\n");
 }
 
 void console_fullmap(int argc, char *argv[], void *context)
@@ -615,7 +626,7 @@ void console_statu(int argc, char *argv[], void *context)
   int id;
 
   if (argc < 2) {
-    fc_printf("500 statu needs unit ID\n");
+    fc_printf("500 Usage: statu UNITID\n");
     return;
   }
 
@@ -647,7 +658,7 @@ void console_statu(int argc, char *argv[], void *context)
     break;
   }
   console_unit_orders(punit, "250");
-  fc_printf("250 statu %d\n", id);
+  fc_printf("250 statu = %d\n", id);
 }
 
 /****************************************************************************
