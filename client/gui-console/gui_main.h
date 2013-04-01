@@ -20,8 +20,10 @@ char *next_word(char const **s, char const *ifs);
 void console_command(char const *s);
 
 void console_endturn(int argc, char *argv[], void *context);
+void console_focus(int argc, char *argv[], void *context);
 void console_lsc(int argc, char *argv[], void *context);
 void console_lsu(int argc, char *argv[], void *context);
+void console_move(int argc, char *argv[], void *context);
 void console_fullmap(int argc, char *argv[], void *context);
 void console_statu(int argc, char *argv[], void *context);
 

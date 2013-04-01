@@ -43,7 +43,9 @@
 /* client */
 #include "chatline_common.h"
 #include "client_main.h"
+#include "climap.h"
 #include "clinet.h"
+#include "control.h"
 #include "editgui_g.h"
 #include "ggz_g.h"
 #include "options.h"
@@ -114,10 +116,19 @@ void console_command(char const *s)
   const char SERVER_COMMAND_PREFIX = '/';
   struct command_handler const handlers[] = {
     { "endturn", &console_endturn, NULL },
+    { "focus", &console_focus, NULL },
     { "lsc", &console_lsc, NULL },
     { "lsu", &console_lsu, NULL },
     { "fullmap", &console_fullmap, NULL },
     { "statu", &console_statu, NULL },
+    { "n", &console_move, NULL },
+    { "s", &console_move, NULL },
+    { "w", &console_move, NULL },
+    { "e", &console_move, NULL },
+    { "nw", &console_move, NULL },
+    { "ne", &console_move, NULL },
+    { "sw", &console_move, NULL },
+    { "se", &console_move, NULL },
     { NULL, NULL, NULL }
   };
   char **words;
@@ -164,6 +175,98 @@ void console_endturn(int argc, char *argv[], void *context)
   user_ended_turn();
 }
 
+void console_focus(int argc, char *argv[], void *context)
+{
+  void (*focus_fn)(struct unit *);
+
+  if (argc < 2) {
+    fc_printf("500 Usage: focus add|set ARGS...\n");
+    return;
+  }
+
+  switch (argv[1][0]) {
+  case 'a':
+  case 'A':
+    if (argc < 3) {
+      fc_printf("500 Usage: focus add TILE|UNITID...\n");
+      return;
+    }
+    focus_fn = &add_unit_focus;
+    break;
+  case 's':
+  case 'S':
+    if (argc < 3) {
+      fc_printf("500 Usage: focus set TILE|UNITID...\n");
+      return;
+    }
+    focus_fn = &set_unit_focus;
+    break;
+  default:
+    fc_printf("500 Usage: focus add|set ARGS...\n");
+    return;
+  }
+
+  /* FIXME: Find and use a helper to interpret abbreviations. */
+  switch (argv[1][0]) {
+    struct unit_list *units;
+    struct unit *punit;
+    int unit_id;
+    int i;
+  case 'a':
+  case 'A':
+  case 's':
+  case 'S':
+    units = unit_list_new();
+
+    /* Check that all the named units/tiles exist. */
+    for (i = 2; i < argc; i++) {
+      char const *comma = strchr(argv[i], ',');
+      if (comma) {
+	struct tile *ptile;
+	int x, y;
+
+	x = atoi(argv[i]);
+	y = atoi(comma + 1);
+
+	ptile = map_pos_to_tile(x, y);
+	if (!ptile) {
+	  fc_printf("404 No known tile at (%d, %d)\n", x, y);
+	  unit_list_free(units);
+	  return;
+	}
+
+	if (!unit_list_size(ptile->units)) {
+	  fc_printf("404 No units at (%d, %d)\n", x, y);
+	  unit_list_free(units);
+	  return;
+	}
+
+	unit_list_iterate(ptile->units, punit) {
+	  unit_list_append(units, punit);
+	} unit_list_iterate_end;
+      } else {
+	unit_id = atoi(argv[i]);
+	punit = game_find_unit_by_number(unit_id);
+	if (!punit) {
+	  fc_printf("404 Unit %d not found\n", unit_id);
+	  unit_list_free(units);
+	  return;
+	}
+	unit_list_append(units, punit);
+      }
+    }
+
+    /* Once we know they all exist, focus them. */
+    unit_list_iterate(units, punit) {
+      (*focus_fn)(punit);
+      focus_fn = &add_unit_focus;
+    } unit_list_iterate_end;
+
+    unit_list_free(units);
+    break;
+  }
+}
+
 void console_lsc(int argc, char *argv[], void *context)
 {
   int n;
@@ -201,6 +304,34 @@ void console_lsu(int argc, char *argv[], void *context)
     fc_printf("250- %d %s units\n", n_player, nation_adjective_for_player(pplayer));
   } players_iterate_end;
   fc_printf("250 %d total units\n", n_total);
+}
+
+void console_move(int argc, char *argv[], void *context)
+{
+  struct {
+    char const *name;
+    enum direction8 dir;
+  } const directions[] = {
+    { "n", DIR8_NORTH },
+    { "s", DIR8_SOUTH },
+    { "w", DIR8_WEST },
+    { "e", DIR8_EAST },
+    { "nw", DIR8_NORTHWEST },
+    { "ne", DIR8_NORTHEAST },
+    { "sw", DIR8_SOUTHWEST },
+    { "se", DIR8_SOUTHEAST },
+    { NULL, DIR8_LAST }
+  };
+  int i;
+
+  for (i = 0; directions[i].name; i++) {
+    if (mystrcasecmp(directions[i].name, argv[0]) == 0) {
+      key_unit_move(map_to_gui_dir(directions[i].dir));
+      return;
+    }
+  }
+
+  fc_printf("500 No such direction: %s\n", argv[0]);
 }
 
 void console_fullmap(int argc, char *argv[], void *context)
