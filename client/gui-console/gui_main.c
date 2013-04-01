@@ -277,6 +277,8 @@ void console_command(char const *s)
   struct command_handler const handlers[] = {
     { "endturn", &console_endturn, NULL },
     { "focus", &console_focus, NULL },
+    { "goto", &console_goto, NULL },
+    { "hover", &console_hover, NULL },
     { "lsc", &console_lsc, NULL },
     { "lsu", &console_lsu, NULL },
     { "fullmap", &console_fullmap, NULL },
@@ -418,6 +420,59 @@ void console_focus(int argc, char *argv[], void *context)
 
     unit_list_free(units);
     break;
+  }
+}
+
+void console_goto(int argc, char *argv[], void *context)
+{
+  struct tile *ptile;
+  int n_units;
+
+  if (argc < 2 || !console_get_tile(argv[1], &ptile)) {
+    fc_printf("500 Usage: goto TILE\n");
+    return;
+  }
+
+  if (!ptile) {
+    fc_printf("404 No known tile for \"%s\"\n", argv[1]);
+    return;
+  }
+
+  key_unit_goto();
+
+  do_map_click(ptile, SELECT_APPEND);
+
+  n_units = 0;
+  unit_list_iterate(get_units_in_focus(), punit) {
+    console_unit_orders(punit, "250");
+    n_units++;
+  } unit_list_iterate_end;
+  fc_printf("250 %d units sent to (%d, %d)\n",
+	    n_units, TILE_XY(ptile));
+}
+
+void console_hover(int argc, char *argv[], void *context)
+{
+  struct tile *ptile;
+
+  if (argc < 2 || !console_get_tile(argv[1], &ptile)) {
+    fc_printf("500 Usage: hover TILE\n");
+    return;
+  }
+
+  if (!ptile) {
+    fc_printf("404 No known tile for \"%s\"\n", argv[1]);
+    return;
+  }
+
+  control_mouse_cursor(ptile);
+
+  if (ptile->terrain) {
+    fc_printf("250 Hover (%d, %d) %s\n",
+	      TILE_XY(ptile), terrain_name_translation(ptile->terrain));
+  } else {
+    fc_printf("250 Hover (%d, %d) [Unknown]\n",
+	      TILE_XY(ptile));
   }
 }
 
