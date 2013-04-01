@@ -16,6 +16,7 @@
 #endif
 
 /* common & utility */
+#include "fciconv.h"
 #include "fcintl.h"
 #include "game.h"
 #include "support.h"
@@ -36,13 +37,13 @@
 void update_info_label(void)
 {
   /* PORTME */
-  char buffer[512];
+  static char buffer[2][512] = { "", "" };
 
-  my_snprintf(buffer, sizeof(buffer),
-	      _("Population: %s\n"
-		"Year: %s\n"
-		"Gold %d\n"
-		"Tax: %d Lux: %d Sci: %d"),
+  my_snprintf(buffer[0], sizeof (buffer[0]),
+	      "100- Population: %s\n"
+	      "100- Year: %s\n"
+	      "100- Gold %d\n"
+	      "100- Tax: %d Lux: %d Sci: %d\n",
 	      population_to_text(civ_population(client.conn.playing)),
 	      textyear(game.info.year),
 	      client.conn.playing->economic.gold,
@@ -50,7 +51,11 @@ void update_info_label(void)
 	      client.conn.playing->economic.luxury,
 	      client.conn.playing->economic.science);
 
-  /* ... */
+  if (strcmp(buffer[0], buffer[1]) != 0) {
+    /* Something has changed, so it's worth printing. */
+    fc_printf("%s", buffer[0]);
+    strcpy(buffer[1], buffer[0]);
+  }
 }
 
 /****************************************************************************
