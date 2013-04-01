@@ -26,7 +26,8 @@
 ****************************************************************************/
 bool isometric_view_supported(void)
 {
-  return FALSE;
+  /* Console actually doesn't really use the tileset, so just lie. */
+  return TRUE;
 }
 
 /****************************************************************************
@@ -34,6 +35,7 @@ bool isometric_view_supported(void)
 ****************************************************************************/
 bool overhead_view_supported(void)
 {
+  /* Console actually doesn't really use the tileset, so just lie. */
   return TRUE;
 }
 
