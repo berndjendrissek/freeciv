@@ -364,7 +364,7 @@ void console_endturn(int argc, char *argv[], void *context)
 
 void console_focus(int argc, char *argv[], void *context)
 {
-  void (*focus_fn)(struct unit *);
+  void (*focus_fn)(struct unit *) = NULL;
 
   if (argc < 2) {
     fc_printf("500 Usage: focus add|list|set ARGS...\n");
