@@ -226,6 +226,16 @@ static bool console_get_tile(char const *word, struct tile **pptile)
   return TRUE;
 }
 
+static void console_unit_summary(struct unit *punit, char const *prefix)
+{
+  fc_printf("%s- %d. (%d, %d) %s (%s) %d/%d [%s]\n", prefix,
+	    punit->id, TILE_XY(punit->tile),
+	    unit_name_translation(punit),
+	    punit->utype->veteran[punit->veteran].name,
+	    punit->moves_left, punit->utype->move_rate,
+	    nation_plural_for_player(punit->owner));
+}
+
 static void console_unit_orders(struct unit *punit, char const *prefix)
 {
   int order_index;
@@ -342,7 +352,7 @@ void console_focus(int argc, char *argv[], void *context)
   void (*focus_fn)(struct unit *);
 
   if (argc < 2) {
-    fc_printf("500 Usage: focus add|set ARGS...\n");
+    fc_printf("500 Usage: focus add|list|set ARGS...\n");
     return;
   }
 
@@ -363,8 +373,11 @@ void console_focus(int argc, char *argv[], void *context)
     }
     focus_fn = &set_unit_focus;
     break;
+  case 'l':
+  case 'L':
+    break;
   default:
-    fc_printf("500 Usage: focus add|set ARGS...\n");
+    fc_printf("500 Usage: focus add|list|set ARGS...\n");
     return;
   }
 
@@ -419,6 +432,13 @@ void console_focus(int argc, char *argv[], void *context)
     } unit_list_iterate_end;
 
     unit_list_free(units);
+    break;
+  case 'l':
+  case 'L':
+    unit_list_iterate(get_units_in_focus(), punit) {
+      console_unit_summary(punit, "250");
+    } unit_list_iterate_end;
+    fc_printf("250 focus list = %d\n", unit_list_size(get_units_in_focus()));
     break;
   }
 }
@@ -501,12 +521,7 @@ void console_lsu(int argc, char *argv[], void *context)
   players_iterate(pplayer) {
     n_player = 0;
     unit_list_iterate(pplayer->units, punit) {
-      fc_printf("250- %d. (%d, %d) %s (%s) %d/%d [%s]\n",
-		punit->id, TILE_XY(punit->tile),
-		unit_name_translation(punit),
-		punit->utype->veteran[punit->veteran].name,
-		punit->moves_left, punit->utype->move_rate,
-		nation_plural_for_player(punit->owner));
+      console_unit_summary(punit, "250");
       n_player++;
       n_total++;
     } unit_list_iterate_end;
