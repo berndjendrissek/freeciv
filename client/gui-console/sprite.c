@@ -47,7 +47,6 @@ struct sprite *load_gfxfile(const char *filename)
 {
   struct sprite *sprite = fc_malloc(sizeof (*sprite));
 
-  fc_fprintf(stderr, "Loading %s\n", filename);
   sprite->filename = mystrdup(filename);
 
   /*
