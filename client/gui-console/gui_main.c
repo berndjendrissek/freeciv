@@ -38,6 +38,7 @@
 #include "log.h"
 #include "mem.h"
 #include "netintf.h"
+#include "shared.h"
 #include "support.h"
 
 /* client */
@@ -292,6 +293,7 @@ void console_command(char const *s)
     { "hover", &console_hover, NULL },
     { "lsc", &console_lsc, NULL },
     { "lsu", &console_lsu, NULL },
+    { "alliances", &console_politics, NULL },
     { "fullmap", &console_fullmap, NULL },
     { "statc", &console_statc, NULL },
     { "statu", &console_statu, NULL },
@@ -576,6 +578,25 @@ void console_move(int argc, char *argv[], void *context)
   }
 
   fc_printf("500 Usage: n|s|w|e|nw|ne|sw|se\n");
+}
+
+void console_politics(int argc, char *argv[], void *context)
+{
+  int i;
+
+  fc_printf("strict graph alliances {\n");
+  players_iterate(pplayer) {
+    players_iterate(other_player) {
+      struct player_diplstate const *diplstate;
+      diplstate = pplayer_get_diplstate(pplayer, other_player);
+      if (diplstate->type == DS_ALLIANCE) {
+	fc_printf("  \"%s\" -- \"%s\"\n",
+		  nation_plural_for_player(pplayer),
+		  nation_plural_for_player(other_player));
+      }
+    } players_iterate_end;
+  } players_iterate_end;
+  fc_printf("}\n");
 }
 
 void console_fullmap(int argc, char *argv[], void *context)
