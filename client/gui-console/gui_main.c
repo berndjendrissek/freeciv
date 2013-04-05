@@ -574,6 +574,7 @@ void console_move(int argc, char *argv[], void *context)
   for (i = 0; directions[i].name; i++) {
     if (mystrcasecmp(directions[i].name, argv[0]) == 0) {
       key_unit_move(map_to_gui_dir(directions[i].dir));
+      fc_printf("250 %s\n", argv[0]);
       return;
     }
   }
@@ -583,8 +584,6 @@ void console_move(int argc, char *argv[], void *context)
 
 void console_politics(int argc, char *argv[], void *context)
 {
-  int i;
-
   fc_printf("strict graph alliances {\n");
   players_iterate(pplayer) {
     players_iterate(other_player) {
@@ -598,6 +597,7 @@ void console_politics(int argc, char *argv[], void *context)
     } players_iterate_end;
   } players_iterate_end;
   fc_printf("}\n");
+  fc_printf("250 %s\n", argv[0]);
 }
 
 void console_quit(int argc, char *argv[], void *context)
