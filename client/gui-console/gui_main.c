@@ -294,6 +294,7 @@ void console_command(char const *s)
     { "lsc", &console_lsc, NULL },
     { "lsu", &console_lsu, NULL },
     { "alliances", &console_politics, NULL },
+    { "quit", &console_quit, NULL },
     { "fullmap", &console_fullmap, NULL },
     { "statc", &console_statc, NULL },
     { "statu", &console_statu, NULL },
@@ -597,6 +598,13 @@ void console_politics(int argc, char *argv[], void *context)
     } players_iterate_end;
   } players_iterate_end;
   fc_printf("}\n");
+}
+
+void console_quit(int argc, char *argv[], void *context)
+{
+  fc_printf("250 quit\n");
+  tileset_free_tiles(tileset);
+  client_exit();
 }
 
 void console_fullmap(int argc, char *argv[], void *context)
