@@ -605,7 +605,6 @@ void console_politics(int argc, char *argv[], void *context)
 void console_quit(int argc, char *argv[], void *context)
 {
   fc_printf("250 quit\n");
-  tileset_free_tiles(tileset);
   client_exit();
 }
 
@@ -886,7 +885,6 @@ void ui_main(int argc, char *argv[])
 	  client_exit();
 	  break;
 	case 0:
-	  tileset_free_tiles(tileset);
 	  client_exit();
 	  break;
 	default:
