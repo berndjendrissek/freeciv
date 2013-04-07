@@ -34,6 +34,7 @@
 
 /* utility */
 #include "fciconv.h"
+#include "fcintl.h"
 #include "game.h"
 #include "log.h"
 #include "mem.h"
@@ -46,6 +47,7 @@
 #include "client_main.h"
 #include "climap.h"
 #include "clinet.h"
+#include "connectdlg_common.h"
 #include "control.h"
 #include "editgui_g.h"
 #include "ggz_g.h"
@@ -793,6 +795,26 @@ void ui_main(int argc, char *argv[])
   struct timeval timeout;
   double seconds;
   int stdin_flags;
+  int i;
+
+  for (i = 1; i < argc; i++) {
+    fc_fprintf(stderr, "argv[%d] = %s\n", i, argv[i]);
+    if (is_option("--", argv[i])) {
+      /* Argument list separator: harmless but also purposeless. */
+    } else if (is_option("--create", argv[i])) {
+      if (is_server_running() || !client_start_server()) {
+	fc_fprintf(stderr, "500 Couldn't start server\n");
+	exit(EXIT_FAILURE);
+      }
+    } else if (is_option("--help", argv[i])) {
+      fc_fprintf(stderr, _("Valid client options are:\n"));
+      fc_fprintf(stderr, _("  -c, --create\tCreate new server\n"));
+      exit(EXIT_SUCCESS);
+    } else {
+      fc_fprintf(stderr, _("Unrecognized option: \"%s\"\n"), argv[i]);
+      exit(EXIT_FAILURE);
+    }
+  }
 
   tileset_init(tileset);
   tileset_load_tiles(tileset);
@@ -941,6 +963,7 @@ static void set_wait_for_writable_socket(struct connection *pc,
 **************************************************************************/
 void add_net_input(int sock)
 {
+  fc_printf("100 Connected\n");
   sockets.server = sock;
   client.conn.notify_of_writable_data = set_wait_for_writable_socket;
 }
@@ -952,6 +975,7 @@ void add_net_input(int sock)
 **************************************************************************/
 void remove_net_input(void)
 {
+  fc_printf("100 Disconnected\n");
   sockets.server = -1;
 }
 
