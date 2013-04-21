@@ -1,0 +1,50 @@
+if { [expr {[freeciv_start babymap "Alexander I Battemberg"]} == 0] } {
+	fail "lsu"
+	return
+}
+
+set units ""
+remote_send host "lsu\n"
+remote_expect host 1 {
+	-re "***:(?w)^250- (\\d*)\\. \\(\\d+, *\\d+\\) *\\w+ *\\(\\w+\\) *\\d+\/\\d+ *\\\[\[^\]\]*\\]" {
+		lappend units [list $expect_out(1,string) $expect_out(0,string)]
+		exp_continue
+	}
+	-re "***:(?w)^250 lsu" {
+	}
+	timeout {
+		fail "lsu timeout\n"
+	}
+}
+
+set units [lsort -integer -index 0 $units]
+set units_flat ""
+foreach unit $units {
+	set units_flat "$units_flat[lindex $unit 1]\n"
+}
+
+set units_golden [string trimleft "
+250- 107. (7, 8) Explorer (green) 3/3 \[Bulgarians\]
+250- 253. (7, 8) Diplomat (green) 6/6 \[Bulgarians\]
+250- 258. (7, 11) Diplomat (green) 6/6 \[Bulgarians\]
+250- 296. (5, 9) Diplomat (green) 6/6 \[Bulgarians\]
+250- 543. (5, 9) Musketeers (veteran) 3/3 \[Bulgarians\]
+250- 559. (9, 6) Diplomat (green) 6/6 \[Bulgarians\]
+250- 592. (7, 8) Musketeers (hardened) 3/3 \[Bulgarians\]
+250- 604. (10, 5) Musketeers (hardened) 0/3 \[Bulgarians\]
+250- 650. (9, 4) Musketeers (veteran) 0/3 \[Bulgarians\]
+250- 652. (7, 11) Musketeers (veteran) 3/3 \[Bulgarians\]
+250- 653. (9, 6) Musketeers (hardened) 3/3 \[Bulgarians\]
+250- 655. (4, 11) Musketeers (hardened) 3/3 \[Malagasies\]
+"]
+
+if { [string equal $units_flat $units_golden] } {
+	pass "lsu"
+} else {
+	fail "lsu"
+}
+
+if { [expr {[freeciv_end]} == 0] } {
+	fail "lsu"
+	return
+}

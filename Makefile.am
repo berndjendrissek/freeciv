@@ -1,5 +1,7 @@
 ## Process this file with automake to produce Makefile.in
 
+AUTOMAKE_OPTIONS = dejagnu
+
 ACLOCAL_AMFLAGS = -I m4 -I dependencies/m4
 
 if CLIENT
@@ -32,6 +34,14 @@ endif
 
 
 SUBDIRS=	$(DSUBDIRS) utility common tests win32 $(SSUBDIRS) $(CSUBDIRS) po doc $(MSUBDIRS)
+
+DEJATOOL =
+if CLIENT_GUI_CONSOLE
+DEJATOOL += freeciv-console
+endif
+RUNTESTSRCDIR = client/tests
+# My patch to support RUNTESTSRCDIR isn't in my installed automake yet.
+RUNTESTDEFAULTFLAGS = --tool $$tool --srcdir $(top_srcdir)/client/tests
 
 ## Automake should distribute config.rpath automatically - and new
 ## versions probably do. We still support versions that do not, so
