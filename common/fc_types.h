@@ -292,6 +292,7 @@ BV_DEFINE(bv_startpos_nations, MAX_NUM_STARTPOS_NATIONS);
 
 enum gui_type {
   GUI_STUB,
+  GUI_CONSOLE,
   GUI_GTK2,
   GUI_SDL,
   GUI_XAW,

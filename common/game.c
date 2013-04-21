@@ -648,7 +648,7 @@ const char *gui_name(enum gui_type gui)
 {
   /* This must be in same order as enum gui_type in fc_types.h */
   const char *gui_names[] = {
-    "stub", "gtk2", "sdl", "xaw", "win32", "ftwl" };
+    "stub", "console", "gtk2", "sdl", "xaw", "win32", "ftwl" };
 
   if (gui < GUI_LAST) {
     return gui_names[gui];

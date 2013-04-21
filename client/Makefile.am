@@ -16,6 +16,9 @@ endif
 if CLIENT_GUI_XAW
 GUI_SUBDIRS += gui-xaw
 endif
+if CLIENT_GUI_CONSOLE
+GUI_SUBDIRS += gui-console
+endif
 if CLIENT_GUI_STUB
 GUI_SUBDIRS += gui-stub
 endif
@@ -207,6 +210,20 @@ freeciv_win32_LDADD = \
  $(top_builddir)/common/libfreeciv.la \
  $(INTLLIBS) $(CLIENT_LIBS) $(SOUND_LIBS) $(LIB_GGZMOD) $(CLIENTICON) \
  $(GUI_win32_LIBS)
+endif
+
+if CLIENT_GUI_CONSOLE
+bin_PROGRAMS += freeciv-console
+noinst_LTLIBRARIES += libfcgui-console.la
+libfcgui_console_la_SOURCES = $(freeciv_client_src)
+libfcgui_console_la_LIBADD = gui-console/libgui-console.la agents/libagents.la
+freeciv_console_SOURCES = dummy.c
+freeciv_console_LDFLAGS = $(GUI_console_LDFLAGS) $(GGZMOD_LDFLAGS)
+freeciv_console_LDADD = \
+ libfcgui-console.la \
+ $(top_builddir)/common/libfreeciv.la \
+ $(INTLLIBS) $(CLIENT_LIBS) $(SOUND_LIBS) $(LIB_GGZMOD) $(CLIENTICON) \
+ $(GUI_console_LIBS)
 endif
 
 if CLIENT_GUI_STUB
