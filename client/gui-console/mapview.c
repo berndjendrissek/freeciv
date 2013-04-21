@@ -43,13 +43,15 @@ void update_info_label(void)
 	      "100- Population: %s\n"
 	      "100- Year: %s\n"
 	      "100- Gold %d\n"
-	      "100- Tax: %d Lux: %d Sci: %d\n",
+	      "100- Tax: %d Lux: %d Sci: %d\n"
+	      "100  Turn %d\n",
 	      population_to_text(civ_population(client.conn.playing)),
 	      textyear(game.info.year),
 	      client.conn.playing->economic.gold,
 	      client.conn.playing->economic.tax,
 	      client.conn.playing->economic.luxury,
-	      client.conn.playing->economic.science);
+	      client.conn.playing->economic.science,
+	      game.info.turn);
 
   if (strcmp(buffer[0], buffer[1]) != 0) {
     /* Something has changed, so it's worth printing. */

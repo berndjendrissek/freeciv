@@ -18,6 +18,7 @@
 #include <stdio.h>
 
 #include "climisc.h"      /* for write_chatline_content */
+#include "fciconv.h"
 
 #include "chatline.h"
 
@@ -29,7 +30,7 @@ void real_output_window_append(const char *astring,
                                const struct text_tag_list *tags,
                                int conn_id)
 {
-  puts(astring);
+  fc_printf("100 chat %s\n", astring);
 }
 
 /**************************************************************************
@@ -46,5 +47,5 @@ void log_output_window(void)
 **************************************************************************/
 void clear_output_window(void)
 {
-  putc('\014', stdout);
+  fc_printf("100 formfeed ==8<-- ==8<-- ==8<-- ==8<-- ==8<-- ==8<-- ==8<-- ==8<-- ==8<--\n");
 }
