@@ -240,9 +240,9 @@ dnl auto: Autodetect one.
 dnl all:  Autodetect as many as possible.
 dnl comma-separated-list: Detect these or abort.
 AC_ARG_ENABLE(client,
-[  --enable-client[=auto/all/gtk2/gtk3/sdl/xaw/qt/stub]
+[  --enable-client[=auto/all/gtk2/gtk3/sdl/xaw/qt/console/stub]
                           clients to compile [[auto]] (or list for multiple)
-                          maintained clients: gtk2/gtk3/sdl/xaw/stub
+                          maintained clients: gtk2/gtk3/sdl/xaw/console/stub
                           clients in development: qt],
 [clients=${enableval}],
 [client=auto])
@@ -253,6 +253,7 @@ gui_sdl=no
 gui_xaw=no
 gui_qt=no
 gui_beos=no
+gui_console=no
 gui_stub=no
 
 for gui in $(echo $clients | $SED 's/,/ /g') ; do
@@ -804,6 +805,21 @@ if test "x$client" != "xno"; then
     fi
   fi
 
+  dnl Console-specific overrides
+  if test "x$gui_console" = "xyes" || test "x$client" = "xall" ; then
+    found_client=yes
+
+    if test "x$found_client" = "xyes"; then
+      gui_console=yes
+      if test "x$client" = "xauto" ; then
+        client=yes
+      fi
+      GUI_console_LIBS="-lm"
+    elif test "x$gui_console" = "xyes"; then
+      AC_MSG_ERROR(specified client 'console' not configurable)
+    fi
+  fi
+
   dnl Stub-specific overrides
   if test "x$gui_stub" = "xyes" || test "x$client" = "xall" ; then
     found_client=yes
@@ -835,6 +851,7 @@ if test "x$client" = "xall" ; then
      test "x$gui_xaw" = "xyes" ||
      test "x$gui_qt" = "xyes" ||
      test "x$gui_beos" = "xyes" ||
+     test "x$gui_console" = "xyes" ||
      test "x$gui_stub" = "xyes" ; then
     client=yes
   else
@@ -942,6 +959,9 @@ AC_SUBST([GUI_qt_CFLAGS])
 AC_SUBST([GUI_qt_CXXFLAGS])
 AC_SUBST([GUI_qt_LIBS])
 AC_SUBST([GUI_qt_LDFLAGS])
+AC_SUBST([GUI_console_CFLAGS])
+AC_SUBST([GUI_console_LIBS])
+AC_SUBST([GUI_console_LDFLAGS])
 AC_SUBST([GUI_stub_CFLAGS])
 AC_SUBST([GUI_stub_LIBS])
 AC_SUBST([GUI_stub_LDFLAGS])
@@ -962,6 +982,7 @@ AM_CONDITIONAL(CLIENT_GUI_GTK_2_0, test "x$gui_gtk2" = "xyes")
 AM_CONDITIONAL(CLIENT_GUI_GTK_3_0, test "x$gui_gtk3" = "xyes")
 AM_CONDITIONAL(CLIENT_GUI_XAW, test "x$gui_xaw" = "xyes")
 AM_CONDITIONAL(CLIENT_GUI_QT, test "x$gui_qt" = "xyes")
+AM_CONDITIONAL(CLIENT_GUI_CONSOLE, test "x$gui_console" = "xyes")
 AM_CONDITIONAL(CLIENT_GUI_STUB, test "x$gui_stub" = "xyes")
 AM_CONDITIONAL(CLIENT_GUI_BEOS, test "x$gui_beos" = "xyes")
 AM_CONDITIONAL(MINGW32, test x"$MINGW32" = "xyes")
@@ -1374,6 +1395,7 @@ AC_CONFIG_FILES([Makefile
 	  client/gui-gtk-3.0/Makefile
 	  client/gui-xaw/Makefile
           client/gui-qt/Makefile
+	  client/gui-console/Makefile
 	  client/gui-stub/Makefile
           client/luascript/Makefile
 	  server/Makefile
@@ -1463,6 +1485,7 @@ AC_MSG_NOTICE([
     Gtk-3.0: $gui_gtk3
     SDL:     $gui_sdl
     Xaw:     $gui_xaw
+    Console: $gui_console
     Stub:    $gui_stub
 
   In-development client frontends:

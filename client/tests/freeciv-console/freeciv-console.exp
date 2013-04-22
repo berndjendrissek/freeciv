@@ -1,0 +1,54 @@
+proc freeciv_start { savegame player } {
+	set freeciv_client [remote_spawn host "./fcgui --gui console -n testsuite -- -c"]
+
+	remote_expect host 5 {
+		-re "***:(?w)^100 chat Established control over the server" {
+		}
+		timeout {
+			remote_send host "quit\n"
+			return 0
+		}
+	}
+
+	remote_send host "/load client/tests/$savegame\n";
+	remote_expect host 1 {
+		-re "***:(?w)^100 chat Testsuite has been removed" {
+		}
+		timeout {
+			return 0
+		}
+	}
+
+	remote_send host "/take \"$player\"\n";
+	remote_expect host 1 {
+		-re "***:(?w)^100 chat.*testsuite now controls $player" {
+		}
+		timeout {
+			return 0
+		}
+	}
+
+	remote_send host "/start\n";
+	remote_expect host 1 {
+		-re "***:(?w)^100  Turn" {
+			pass "start game"
+		}
+		timeout {
+			return 0
+		}
+	}
+
+	return $freeciv_client
+}
+
+proc freeciv_end { } {
+	remote_send host "quit\n";
+	remote_expect host 5 {
+		-re "***:(?w)^250 quit" {
+			return 1
+		}
+		timeout {
+			return 0
+		}
+	}
+}
