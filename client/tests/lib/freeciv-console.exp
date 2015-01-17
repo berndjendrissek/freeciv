@@ -11,7 +11,7 @@ proc freeciv_start { savegame player } {
 	}
 
 	remote_send host "/load client/tests/$savegame\n";
-	remote_expect host 1 {
+	remote_expect host 5 {
 		-re "***:(?w)^100 chat Testsuite has been removed" {
 		}
 		timeout {
@@ -20,7 +20,7 @@ proc freeciv_start { savegame player } {
 	}
 
 	remote_send host "/take \"$player\"\n";
-	remote_expect host 1 {
+	remote_expect host 5 {
 		-re "***:(?w)^100 chat.*testsuite now controls $player" {
 		}
 		timeout {
@@ -29,7 +29,7 @@ proc freeciv_start { savegame player } {
 	}
 
 	remote_send host "/start\n";
-	remote_expect host 1 {
+	remote_expect host 5 {
 		-re "***:(?w)^100  Turn" {
 			pass "start game"
 		}
