@@ -45,7 +45,12 @@ if CLIENT_GUI_CONSOLE
 DEJATOOL += freeciv-console
 endif
 RUNTESTSRCDIR = client/tests
-# My patch to support RUNTESTSRCDIR isn't in my installed automake yet.
+# Automake doesn't yet support RUNTESTSRCDIR, so override its definition for
+# (DejaGNU's) srcdir, because runtest reads site.exp after noticing --srcdir
+# during its first scan of its arguments.
+EXTRA_DEJAGNU_SITE_CONFIG = bootstrap/dejagnu-site-config.exp
+# But that isn't enough, --srcdir also takes effect again after runtest reads
+# site.exp.
 RUNTESTDEFAULTFLAGS = --tool $$tool --srcdir $(top_srcdir)/client/tests
 
 ## Automake should distribute config.rpath automatically - and new
