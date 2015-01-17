@@ -52,3 +52,16 @@ proc freeciv_end { } {
 		}
 	}
 }
+
+proc freeciv_simple_command { command failuremode } {
+	remote_send host $command
+	remote_expect host 5 {
+		-re "***:(?w)^2" {
+			return 1
+		}
+		timeout {
+			fail "$failuremode\n"
+			return 0
+		}
+	}
+}

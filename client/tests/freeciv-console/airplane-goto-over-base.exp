@@ -1,0 +1,28 @@
+# Gna bug 20786.
+if { [expr {[freeciv_start "airplane-test" "Karl XII"]} == 0] } {
+	fail "airplane-goto-over-base start"
+	return
+}
+
+freeciv_simple_command "focus set 111\n" "airplane-goto-over-base focus"
+freeciv_simple_command "goto 1,7\n" "airplane-goto-over-base goto"
+
+remote_send host "statu 111\n"
+remote_expect host 5 {
+	-re "***:(?w)^2..-\\s*Full MP" {
+		fail "airplane-goto-over-base"
+	}
+	-re "***:(?w)^2..-" {
+		exp_continue
+	}
+	-re "***:(?w)^2.. " {
+	}
+	timeout {
+		fail "airplane-goto-over-base statu"
+	}
+}
+
+if { [expr {[freeciv_end]} == 0] } {
+	fail "airplane-goto-over-base end"
+	return
+}
