@@ -1,4 +1,4 @@
-/********************************************************************** 
+/**********************************************************************
  Freeciv - Copyright (C) 1996 - A Kjeldberg, L Gregersen, P Unold
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -209,8 +209,8 @@ void popdown_all_game_dialogs(void)
 *****************************************************************/
 int diplomat_handled_in_diplomat_dialog(void)
 {
-  /* PORTME */    
-  return -1;  
+  /* PORTME */
+  return -1;
 }
 
 /****************************************************************

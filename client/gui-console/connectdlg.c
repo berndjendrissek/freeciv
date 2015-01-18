@@ -1,4 +1,4 @@
-/********************************************************************** 
+/**********************************************************************
  Freeciv - Copyright (C) 1996 - A Kjeldberg, L Gregersen, P Unold
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -91,7 +91,7 @@ void handle_authentication_req(enum authentication_type type,
  server.
 **************************************************************************/
 void handle_game_load(bool load_successful, const char *filename)
-{ 
+{
   /* PORTME */
 }
 

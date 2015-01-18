@@ -1,4 +1,4 @@
-/********************************************************************** 
+/**********************************************************************
  Freeciv - Copyright (C) 2005 The Freeciv Team
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -48,7 +48,7 @@ void gui_clear_theme(void)
 char **get_gui_specific_themes_directories(int *count)
 {
   *count = 0;
-  
+
   return fc_malloc(sizeof(char*) * 0);
 }
 
