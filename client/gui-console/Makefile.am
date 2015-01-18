@@ -3,6 +3,8 @@
 noinst_LTLIBRARIES = libgui-console.la
 AM_CPPFLAGS = -I. -I$(srcdir)/.. -I$(srcdir)/../include -I$(top_srcdir)/utility -I$(top_srcdir)/common $(GUI_console_CFLAGS) $(SOUND_CFLAGS)
 
+EXTRA_DIST = README
+
 libgui_console_la_SOURCES = \
 	canvas.c	\
 	canvas.h	\

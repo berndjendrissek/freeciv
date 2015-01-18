@@ -1,0 +1,34 @@
+I wrote the console client with only one purpose in mind: facilitating
+automated regression testing with DejaGNU. If it's possible to play a game
+using this client, that is a happy coincidence, but *not* a design goal.
+
+The client code is, for the moment, just a copy of the client stub code,
+with just a few basic commands implemented. The commands are:
+
+* city
+  Build a city.
+* endturn
+  End the current turn.
+* focus SUBCOMMAND
+  Manipulate the focus list. Subcommands: add TILE|UNITID, list, set TILE|UNITID
+* goto TILE
+  Send focused units to TILE.
+* hover TILE
+  Get tile info.
+* lsc
+  List all cities.
+* lsu
+  List all units.
+* alliances
+  Output dot(1) format graph of alliances.
+* quit
+  Quit client and kill subordinate server process if necessary.
+* fullmap
+  Show the entire map. Each character cell shows a tile, using the first
+  letter of the terrain name.
+* statc CITYID
+  Show city info.
+* statu UNITID
+  Show unit info.
+* n|s|w|e|nw|ne|sw|se
+  Move focused units in direction given.
